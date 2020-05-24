@@ -48,32 +48,26 @@ else ifeq ($(UNAME_SYS), Linux)
 	LDFLAGS ?= -pthread
 endif
 
-CFLAGS += -fPIC -I$(CURDIR) -DDEBUG -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR) $(SQLITE_CFLAGS)
+
+CFLAGS += -fPIC -I$(CURDIR) -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR) $(SQLITE_CFLAGS)
 CXXFLAGS += -fPIC -I$(CURDIR) -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR)
 
 LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lerl_interface -lei -ldl
 LDFLAGS += -shared
 
-# Verbosity.
-
-c_verbose_0 = @echo " C     " $(?F);
-c_verbose = $(c_verbose_$(V))
-
-cpp_verbose_0 = @echo " CPP   " $(?F);
-cpp_verbose = $(cpp_verbose_$(V))
-
-link_verbose_0 = @echo " LD    " $(@F);
-link_verbose = $(link_verbose_$(V))
-
 SOURCES := $(shell find $(C_SRC_DIR) -type f \( -name "*.c" -o -name "*.C" -o -name "*.cc" -o -name "*.cpp" \))
 OBJECTS = $(addsuffix .o, $(basename $(SOURCES)))
 
-COMPILE_C = $(c_verbose) $(CC) $(CFLAGS) $(CPPFLAGS) -c
-COMPILE_CPP = $(cpp_verbose) $(CXX) $(CXXFLAGS) $(CPPFLAGS) -c
+
+all: $(C_SRC_OUTPUT)
+debug: CFLAGS += -DDEBUG -g
+debug: $(C_SRC_OUTPUT)
+
+COMPILE_C = $(CC) $(CFLAGS) -c
 
 $(C_SRC_OUTPUT): $(OBJECTS)
 	@mkdir -p $(BASEDIR)/priv/
-	$(link_verbose) $(CC) $(OBJECTS) $(LDFLAGS) $(LDLIBS) -o $(C_SRC_OUTPUT)
+	$(CC) $(OBJECTS) $(LDFLAGS) $(LDLIBS) -o $(C_SRC_OUTPUT)
 
 %.o: %.c
 	$(COMPILE_C) $(OUTPUT_OPTION) $<

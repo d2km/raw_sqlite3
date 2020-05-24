@@ -4,6 +4,8 @@
               sqlite3_stmt/0,
               sqlite3_backup/0,
               sqlite3_blob/0,
+              sqlite3_str/0,
+              sqlite3_snapshot/0,
               sqlite3_error_code/0]).
 
 -export([sqlite3_open_v2/3,
@@ -60,7 +62,12 @@
          sqlite3_libversion/0,
          sqlite3_libversion_number/0,
          sqlite3_sourceid/0,
-         sqlite3_complete/1]).
+         sqlite3_complete/1,
+         sqlite3_snapshot_get/2,
+         sqlite3_snapshot_open/3,
+         sqlite3_snapshot_cmp/2,
+         sqlite3_snapshot_free/1,
+         sqlite3_snapshot_recover/2]).
 
 -on_load({init, 0}).
 
@@ -71,6 +78,7 @@
 -opaque sqlite3_stmt() :: reference().
 -opaque sqlite3_blob() :: reference().
 -opaque sqlite3_backup() :: reference().
+-opaque sqlite3_snapshot() :: reference().
 
 -type sqlite3_error_code() :: integer().
 -type sqlite3_str() :: iodata().
@@ -187,7 +195,7 @@ sqlite3_prepare_v2(_Conn, _Sql) ->
 
 -spec sqlite3_bind(sqlite3_stmt(), [Val]) -> Result
               when Val    :: number() | true | false | Null |
-                             {text, sqlite3_stmt} |
+                             {text, sqlite3_str()} |
                              {blob, iodata()},
                    Null   :: nil | undefined,
                    Result :: ok | {error, Reason},
@@ -381,38 +389,41 @@ sqlite3_sourceid() ->
 sqlite3_complete(_Sql) ->
     not_loaded(?LINE).
 
-%% Snapshot API
-%% -spec sqlite3_snapshot_get(sqlite3_conn(), DbName) -> Result
-%%               when DbName :: sqlite3_str(),
-%%                    Result :: {ok, sqlite3_snapshot()} |
-%%                              {error, sqlite3_error_code()}.
-%% sqlite3_snapshot_get(_Conn, _DbName) ->
-%%     not_loaded(?LINE).
+%%%%%%%%%%%%%%%%%
+%% Snapshot API %
+%%%%%%%%%%%%%%%%%
 
-%% -spec sqlite3_snapshot_free(sqlite3_snapshot()) -> ok.
-%% sqlite3_snapshot_free(_Snapshot) ->
-%%     not_loaded(?LINE).
+-spec sqlite3_snapshot_get(sqlite3_conn(), DbName) -> Result
+              when DbName :: sqlite3_str(),
+                   Result :: {ok, sqlite3_snapshot()} |
+                             {error, sqlite3_error_code()}.
+sqlite3_snapshot_get(_Conn, _DbName) ->
+    not_loaded(?LINE).
 
-%% -spec sqlite3_snapshot_open(
-%%         sqlite_conn(),
-%%         DbName :: sqlite3_str(),
-%%         sqlite3_snapshot()
-%%        ) -> sqlite3_error_code().
-%% sqlite3_snapshot_open(_Conn, _DbName, _Snapshot) ->
-%%     not_loaded(?LINE).
+-spec sqlite3_snapshot_free(sqlite3_snapshot()) -> ok.
+sqlite3_snapshot_free(_Snapshot) ->
+    not_loaded(?LINE).
 
-%% -spec sqlite3_snapshot_cmp(Snapshot1, Snapshot2) -> Result
-%%               when Snapshot1 :: sqlite3_snapshot(),
-%%                    Snapshot2 :: sqlite3_snapshot(),
-%%                    Result    :: integer().
-%% sqlite3_snapshot_cmp(_Snapshot1, _Snapshot2) ->
-%%     not_loaded(?LINE).
+-spec sqlite3_snapshot_open(
+        sqlite3_conn(),
+        DbName :: sqlite3_str(),
+        sqlite3_snapshot()
+       ) -> sqlite3_error_code().
+sqlite3_snapshot_open(_Conn, _DbName, _Snapshot) ->
+    not_loaded(?LINE).
 
-%% -spec sqlite3_snapshot_recover(sqlite3_conn(), DbName) -> Result
-%%               when DbName :: sqlite3_str(),
-%%                    Result :: sqlite3_error_code().
-%% sqlite3_snapshot_recover(_Conn, _DbName) ->
-%%     not_loaded(?LINE).
+-spec sqlite3_snapshot_cmp(Snapshot1, Snapshot2) -> Result
+              when Snapshot1 :: sqlite3_snapshot(),
+                   Snapshot2 :: sqlite3_snapshot(),
+                   Result    :: integer().
+sqlite3_snapshot_cmp(_Snapshot1, _Snapshot2) ->
+    not_loaded(?LINE).
+
+-spec sqlite3_snapshot_recover(sqlite3_conn(), DbName) -> Result
+              when DbName :: sqlite3_str(),
+                   Result :: sqlite3_error_code().
+sqlite3_snapshot_recover(_Conn, _DbName) ->
+    not_loaded(?LINE).
 
 %% Serialize API
 %% -spec sqlite3_serialize(sqlite3_conn(), DbName) -> Result

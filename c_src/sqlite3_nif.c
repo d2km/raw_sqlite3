@@ -167,6 +167,13 @@ iodata_to_c_str(ErlNifEnv* env, ERL_NIF_TERM term, ErlNifBinary* pbin)
     return enif_inspect_iolist_as_binary(env, list, pbin);
 }
 
+static int
+iodata_to_binary(ErlNifEnv* env, ERL_NIF_TERM term, ErlNifBinary* pbin)
+{
+    return enif_inspect_binary(env, term, pbin) ||
+           enif_inspect_iolist_as_binary(env, term, pbin);
+}
+
 static ERL_NIF_TERM
 impl_sqlite3_open_v2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
@@ -481,7 +488,7 @@ impl_sqlite3_prepare_v2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     GET_DB(env, argv[0], &rdb);
 
     ErlNifBinary sql;
-    if (!enif_inspect_iolist_as_binary(env, argv[1], &sql))
+    if (!iodata_to_binary(env, argv[1], &sql))
         return enif_make_badarg(env);
 
     const char* leftover;
@@ -552,13 +559,13 @@ bind_cell(ErlNifEnv* env, sqlite3_stmt* stmt, ERL_NIF_TERM term, int idx)
 
         ErlNifBinary bin;
         if (strcmp("text", atom) == 0) {
-            if (!enif_inspect_iolist_as_binary(env, tuple[1], &bin))
+            if (!iodata_to_binary(env, tuple[1], &bin))
                 return -1;
 
             return sqlite3_bind_text(
               stmt, idx, (char*)bin.data, bin.size, SQLITE_TRANSIENT);
         } else if (strcmp("blob", atom) == 0) {
-            if (!enif_inspect_iolist_as_binary(env, tuple[1], &bin))
+            if (!iodata_to_binary(env, tuple[1], &bin))
                 return -1;
 
             return sqlite3_bind_blob(

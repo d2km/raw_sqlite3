@@ -67,7 +67,9 @@
          sqlite3_snapshot_open/3,
          sqlite3_snapshot_cmp/2,
          sqlite3_snapshot_free/1,
-         sqlite3_snapshot_recover/2]).
+         sqlite3_snapshot_recover/2,
+         sqlite3_serialize/2,
+         sqlite3_deserialize/3]).
 
 -on_load({init, 0}).
 
@@ -162,7 +164,7 @@ sqlite3_total_changes(_Conn) ->
 
 -spec sqlite3_db_filename(sqlite3_conn(), DbName) -> DbFileName
               when DbName     :: sqlite3_str(),
-                   DbFileName :: string().
+                   DbFileName :: binary().
 sqlite3_db_filename(_Conn, _DbName) ->
     not_loaded(?LINE).
 
@@ -425,16 +427,19 @@ sqlite3_snapshot_cmp(_Snapshot1, _Snapshot2) ->
 sqlite3_snapshot_recover(_Conn, _DbName) ->
     not_loaded(?LINE).
 
-%% Serialize API
-%% -spec sqlite3_serialize(sqlite3_conn(), DbName) -> Result
-%%               when DbName :: sqlite3_str(),
-%%                    Result :: {ok, Serialization :: binary()} |
-%%                              {error, alloc_memory}.
-%% sqlite3_serialize(_Conn, _DbName) ->
-%%     not_loaded(?LINE).
+%%%%%%%%%%%%%%%%%%
+%% Serialize API %
+%%%%%%%%%%%%%%%%%%
 
-%% sqlite3_deserialize(_Conn, _DbName, _Seralization) ->
-%%     not_loaded(?LINE).
+-spec sqlite3_serialize(sqlite3_conn(), DbName) -> Result
+              when DbName :: sqlite3_str(),
+                   Result :: {ok, Serialization :: binary()} |
+                             {error, alloc_memory}.
+sqlite3_serialize(_Conn, _DbName) ->
+    not_loaded(?LINE).
+
+sqlite3_deserialize(_Conn, _DbName, _Seralization) ->
+    not_loaded(?LINE).
 
 %% NIF initalization
 init() ->

@@ -20,11 +20,11 @@ open(DbFile, Flags) ->
 open(DbFile, Flags, Vfs) ->
     sqlite3_nif:sqlite3_open_v2(DbFile, Flags, Vfs).
 
-close(Conn) ->
-    sqlite3_nif:sqlite3_close_v2(Conn).
+close(Db) ->
+    sqlite3_nif:sqlite3_close_v2(Db).
 
-prepare(Conn, Sql) ->
-    sqlite3_nif:sqlite3_prepare_v2(Conn, Sql).
+prepare(Db, Sql) ->
+    sqlite3_nif:sqlite3_prepare_v2(Db, Sql).
 
 bind(Stmt, Params) ->
     sqlite3_nif:sqlite3_bind(Stmt, Params).
@@ -45,11 +45,11 @@ fetchall(Stmt, Acc) ->
             fetchall(Stmt, [Row | Acc])
     end.
 
-q(Conn, Sql) ->
-    q(Conn, Sql, []).
+q(Db, Sql) ->
+    q(Db, Sql, []).
 
-q(Conn, Sql, Params) ->
-    case prepare(Conn, Sql) of
+q(Db, Sql, Params) ->
+    case prepare(Db, Sql) of
         {ok, Stmt, _} ->
             case sqlite3_nif:sqlite3_bind(Stmt, Params) of
                 ok ->
@@ -61,17 +61,17 @@ q(Conn, Sql, Params) ->
             Err
     end.
 
-exec(Conn, Sql) ->
-    exec(Conn, Sql, []).
+exec(Db, Sql) ->
+    exec(Db, Sql, []).
 
-exec(_Conn, <<>>, _Params) ->
+exec(_Db, <<>>, _Params) ->
     ok;
-exec(Conn, Sql, Params) ->
-    case prepare(Conn, Sql) of
+exec(Db, Sql, Params) ->
+    case prepare(Db, Sql) of
         {ok, Stmt, Leftover} ->
             case do_exec(Stmt, Params) of
                 ok ->
-                    exec(Conn, Leftover, Params);
+                    exec(Db, Leftover, Params);
                 {error, _} = Err ->
                     Err
             end;

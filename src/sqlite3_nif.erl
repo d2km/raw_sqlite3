@@ -93,7 +93,7 @@
                    Flags    :: integer(),
                    Vfs      :: sqlite3_str(),
                    Result   :: {ok, sqlite3()} |
-                             {error, sqlite3_error_code()}.
+                               {error, sqlite3_error_code()}.
 sqlite3_open_v2(_FileName, _Flags, _Vfs) ->
     not_loaded(?LINE).
 

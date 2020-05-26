@@ -491,7 +491,7 @@ impl_sqlite3_prepare_v2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     if (!iodata_to_binary(env, argv[1], &sql))
         return enif_make_badarg(env);
 
-    const char* leftover;
+    const char* leftover = NULL;
     sqlite3_stmt* stmt = NULL;
     int rv =
       sqlite3_prepare_v2(rdb->db, (char*)sql.data, sql.size, &stmt, &leftover);
@@ -511,7 +511,8 @@ impl_sqlite3_prepare_v2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     ERL_NIF_TERM ret_stmt = enif_make_resource(env, rstmt);
     enif_release_resource(rstmt);
 
-    ERL_NIF_TERM ret_leftover = make_binary(env, leftover, strlen(leftover));
+    int leftover_size = leftover ? sql.size - (leftover - (char*)sql.data) : 0;
+    ERL_NIF_TERM ret_leftover = make_binary(env, leftover, leftover_size);
 
     return enif_make_tuple3(env, make_atom(env, "ok"), ret_stmt, ret_leftover);
 }

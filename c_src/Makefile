@@ -52,18 +52,16 @@ endif
 
 
 CFLAGS += -fPIC -I$(CURDIR) -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR) $(SQLITE_CFLAGS)
-CXXFLAGS += -fPIC -I$(CURDIR) -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR)
+
+ifeq ($(DEBUG), 1)
+	CFLAGS += -DDEBUG -g
+endif
 
 LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lerl_interface -lei -ldl
 LDFLAGS += -shared
 
 SOURCES := $(shell find $(C_SRC_DIR) -type f \( -name "*.c" -o -name "*.C" -o -name "*.cc" -o -name "*.cpp" \))
 OBJECTS = $(addsuffix .o, $(basename $(SOURCES)))
-
-
-all: $(C_SRC_OUTPUT)
-debug: CFLAGS += -DDEBUG -g
-debug: $(C_SRC_OUTPUT)
 
 COMPILE_C = $(CC) $(CFLAGS) -c
 

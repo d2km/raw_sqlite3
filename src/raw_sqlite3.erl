@@ -1,6 +1,6 @@
 -module(raw_sqlite3).
 
--include_lib("raw_sqlite3/include/raw_sqlite3.hrl").
+-include_lib("raw_sqlite3/include/sqlite3_nif.hrl").
 
 -export([open/1, open/2, open/3,
          close/1,

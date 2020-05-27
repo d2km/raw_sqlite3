@@ -39,14 +39,14 @@ C_SRC_OUTPUT ?= $(CURDIR)/../priv/$(PROJECT).so
 UNAME_SYS := $(shell uname -s)
 ifeq ($(UNAME_SYS), Darwin)
 	CC ?= cc
-	CFLAGS ?= -O2 -std=c99 -arch x86_64 -finline-functions -Wall -Wmissing-prototypes -pthread
+	CFLAGS ?= -std=c99 -arch x86_64 -finline-functions -Wall -Wmissing-prototypes
 	LDFLAGS ?= -arch x86_64  -flat_namespace  -undefined suppress
 else ifeq ($(UNAME_SYS), FreeBSD)
 	CC ?= cc
-	CFLAGS ?= -O2 -std=c99 -finline-functions -Wall -Wmissing-prototypes
+	CFLAGS ?= -std=c99 -finline-functions -Wall -Wmissing-prototypes
 else ifeq ($(UNAME_SYS), Linux)
 	CC ?= gcc
-	CFLAGS ?= -O2 -std=c99 -finline-functions -Wall -Wmissing-prototypes
+	CFLAGS ?= -std=c99 -finline-functions -Wall -Wmissing-prototypes
 	LDFLAGS ?= -pthread
 endif
 
@@ -54,11 +54,12 @@ endif
 CFLAGS += -fPIC -I$(CURDIR) -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR) $(SQLITE_CFLAGS)
 
 ifeq ($(DEBUG), 1)
-	CFLAGS += -DDEBUG -g
+	CFLAGS += -O0 -DDEBUG -g
+else
+	CFLAGS += -O2
 endif
 
-LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lerl_interface -lei -ldl
-LDFLAGS += -shared
+LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lerl_interface -lei
 
 SOURCES := $(shell find $(C_SRC_DIR) -type f \( -name "*.c" -o -name "*.C" -o -name "*.cc" -o -name "*.cpp" \))
 OBJECTS = $(addsuffix .o, $(basename $(SOURCES)))
@@ -71,15 +72,5 @@ $(C_SRC_OUTPUT): $(OBJECTS)
 
 %.o: %.c
 	$(COMPILE_C) $(OUTPUT_OPTION) $<
-
-%.o: %.cc
-	$(COMPILE_CPP) $(OUTPUT_OPTION) $<
-
-%.o: %.C
-	$(COMPILE_CPP) $(OUTPUT_OPTION) $<
-
-%.o: %.cpp
-	$(COMPILE_CPP) $(OUTPUT_OPTION) $<
-
 clean:
 	@rm -f $(C_SRC_OUTPUT) $(OBJECTS)

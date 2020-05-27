@@ -639,9 +639,8 @@ make_cell(ErlNifEnv* env, sqlite3_stmt* stmt, int col)
 }
 
 static ERL_NIF_TERM
-make_row(ErlNifEnv* env, sqlite3_stmt* stmt)
+make_row(ErlNifEnv* env, sqlite3_stmt* stmt, size_t sz)
 {
-    size_t sz = sqlite3_column_count(stmt);
     ERL_NIF_TERM* terms = enif_alloc(sz * sizeof(ERL_NIF_TERM));
 
     if (!terms)
@@ -659,6 +658,8 @@ make_row(ErlNifEnv* env, sqlite3_stmt* stmt)
 static ERL_NIF_TERM
 impl_sqlite3_step(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
+    size_t sz = 0;
+
     CHECK_ARGC(argc, 1);
 
     sqlite3_stmt_t* rstmt = NULL;
@@ -670,7 +671,13 @@ impl_sqlite3_step(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         case SQLITE_DONE:
             return make_atom(env, "ok");
         case SQLITE_ROW:
-            return make_row(env, rstmt->stmt);
+            sz = sqlite3_column_count(rstmt->stmt);
+            if (sz > 0) {
+                return make_row(env, rstmt->stmt, sz);
+            } else {
+                return enif_make_tuple(env, 0);
+            }
+
         default:
             return make_error_tuple(env, enif_make_int(env, rv));
     }

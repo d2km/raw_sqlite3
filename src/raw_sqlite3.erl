@@ -176,26 +176,26 @@ open(DbFile, Flags) ->
     open(DbFile, Flags, "").
 
 open(DbFile, Flags, Vfs) ->
-    sqlite3_nif:sqlite3_open_v2(DbFile, Flags, Vfs).
+    expand_error(sqlite3_nif:sqlite3_open_v2(DbFile, Flags, Vfs)).
 
 close(Db) ->
-    sqlite3_nif:sqlite3_close_v2(Db).
+    expand_error(sqlite3_nif:sqlite3_close_v2(Db)).
 
 prepare(Db, Sql) ->
-    sqlite3_nif:sqlite3_prepare_v2(Db, Sql).
+    expand_error(Db, sqlite3_nif:sqlite3_prepare_v2(Db, Sql)).
 
 
 bind(Stmt, Params) ->
-    sqlite3_nif:sqlite3_bind(Stmt, Params).
+    expand_error(sqlite3_nif:sqlite3_bind(Stmt, Params)).
 
 step(Stmt) ->
-    sqlite3_nif:sqlite3_step(Stmt).
+    expand_error(sqlite3_nif:sqlite3_step(Stmt)).
 
 fetchall(Stmt) ->
-    fetchall(Stmt, []).
+    expand_error(fetchall(Stmt, [])).
 
 fetchall(Stmt, Acc) ->
-    case step(Stmt) of
+    case sqlite3_nif:sqlite3_step(Stmt) of
         ok ->
             lists:reverse(Acc);
         {error, _} = Err ->
@@ -208,16 +208,16 @@ q(Db, Sql) ->
     q(Db, Sql, []).
 
 q(Db, Sql, Params) ->
-    case prepare(Db, Sql) of
+    case sqlite3_nif:sqlite3_prepare_v2(Db, Sql) of
         {ok, Stmt, _} ->
             case sqlite3_nif:sqlite3_bind(Stmt, Params) of
                 ok ->
                     fetchall(Stmt);
                 {error, _} = Err ->
-                    Err
+                    expand_error(Db, Err)
             end;
         {error, _} = Err ->
-            Err
+            expand_error(Db, Err)
     end.
 
 exec(Db, Sql) ->
@@ -226,22 +226,22 @@ exec(Db, Sql) ->
 exec(_Db, <<>>, _Params) ->
     ok;
 exec(Db, Sql, Params) ->
-    case prepare(Db, Sql) of
+    case sqlite3_nif:sqlite3_prepare_v2(Db, Sql) of
         {ok, Stmt, Leftover} ->
             case exec_one(Stmt, Params) of
                 ok ->
                     exec(Db, Leftover, Params);
                 {error, _} = Err ->
-                    Err
+                    expand_error(Db, Err)
             end;
         {error, _} = Err ->
-            Err
+            expand_error(Db, Err)
     end.
 
 exec_one(Stmt, Params) ->
     case sqlite3_nif:sqlite3_bind(Stmt, Params) of
         ok ->
-            case fetchall(Stmt) of
+            case fetchall(Stmt, []) of
                 {error, _} = Err ->
                     Err;
                 _ ->
@@ -255,20 +255,20 @@ fold(Db, Sql, Fun, Acc) ->
     fold(Db, Sql, [], Fun, Acc).
 
 fold(Db, Sql, Params, Fun, Acc) ->
-    case prepare(Db, Sql) of
+    case sqlite3_nif:sqlite3_prepare_v2(Db, Sql) of
         {ok, Stmt, _Leftover} ->
             case sqlite3_nif:sqlite3_bind(Stmt, Params) of
                 ok ->
-                    do_fold(Stmt, Fun, Acc);
+                    expand_error(Db, do_fold(Stmt, Fun, Acc));
                 {error, _} = Err ->
-                    Err
+                    expand_error(Db, Err)
             end;
         {error, _} = Err ->
-            Err
+            expand_error(Db, Err)
     end.
 
 do_fold(Stmt, Fun, Acc) ->
-        case step(Stmt) of
+        case sqlite3_nif:sqlite3_step(Stmt) of
             ok ->
                 {ok, Acc};
             {error, _} = Err ->
@@ -281,20 +281,20 @@ map(Db, Sql, Fun) ->
     map(Db, Sql, [], Fun).
 
 map(Db, Sql, Params, Fun) ->
-    case prepare(Db, Sql) of
+    case sqlite3_nif:sqlite3_prepare_v2(Db, Sql) of
         {ok, Stmt, _Leftover} ->
             case sqlite3_nif:sqlite3_bind(Stmt, Params) of
                 ok ->
-                    do_map(Stmt, Fun, []);
+                    expand_error(do_map(Stmt, Fun, []));
                 {error, _} = Err ->
-                    Err
+                    expand_error(Db, Err)
             end;
         {error, _} = Err ->
-            Err
+            expand_error(Db, Err)
     end.
 
 do_map(Stmt, Fun, Acc) ->
-    case step(Stmt) of
+    case sqlite3_nif:sqlite3_step(Stmt) of
         ok ->
             {ok, lists:reverse(Acc)};
         {error, _} = Err ->

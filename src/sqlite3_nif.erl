@@ -123,9 +123,11 @@ sqlite3_db_cacheflush(_Db) ->
 sqlite3_db_release_memory(_Db) ->
     not_loaded(?LINE).
 
--spec sqlite3_db_config(sqlite3(), Opt, Val) -> sqlite3_error_code()
-              when Opt :: integer(),
-                   Val :: integer() | sqlite3_str().
+-spec sqlite3_db_config(sqlite3(), Opt, Val) -> Result
+              when Opt    :: integer(),
+                   Val    :: integer() | sqlite3_str(),
+                   Result :: sqlite3_error_code() |
+                             {sqlite3_error_code(), integer()}.
 sqlite3_db_config(_Db, _Opt, _Val) ->
     not_loaded(?LINE).
 

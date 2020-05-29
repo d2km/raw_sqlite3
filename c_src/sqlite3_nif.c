@@ -297,9 +297,9 @@ static ERL_NIF_TERM
 impl_sqlite3_db_config(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     sqlite3_t* rdb = NULL;
-    int rv, op, val;
+    int rv, op, val, ret = 0;
     ErlNifBinary db_name;
-
+    ERL_NIF_TERM retval;
     CHECK_ARGC(argc, 3);
 
     GET_DB(env, argv[0], &rdb);
@@ -308,12 +308,13 @@ impl_sqlite3_db_config(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     if (op == SQLITE_DBCONFIG_MAINDBNAME) {
         GET_C_STR(env, argv[2], &db_name);
         rv = sqlite3_db_config(rdb->db, op, (char*)db_name.data);
+        return enif_make_int(env, rv);
     } else {
         GET_INT(env, argv[2], &val);
-        rv = sqlite3_db_config(rdb->db, op, val);
+        rv = sqlite3_db_config(rdb->db, op, val, &ret);
+        retval = enif_make_int(env, ret);
+        return enif_make_tuple2(env, enif_make_int(env, rv), retval);
     }
-
-    return enif_make_int(env, rv);
 }
 
 static ERL_NIF_TERM

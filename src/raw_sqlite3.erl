@@ -133,23 +133,12 @@
         'SQLITE_OPEN_READONLY'                  |
         'SQLITE_OPEN_READWRITE'                 |
         'SQLITE_OPEN_CREATE'                    |
-        'SQLITE_OPEN_DELETEONCLOSE'             |
-        'SQLITE_OPEN_EXCLUSIVE'                 |
-        'SQLITE_OPEN_AUTOPROXY'                 |
         'SQLITE_OPEN_URI'                       |
         'SQLITE_OPEN_MEMORY'                    |
-        'SQLITE_OPEN_MAIN_DB'                   |
-        'SQLITE_OPEN_TEMP_DB'                   |
-        'SQLITE_OPEN_TRANSIENT_DB'              |
-        'SQLITE_OPEN_MAIN_JOURNAL'              |
-        'SQLITE_OPEN_TEMP_JOURNAL'              |
-        'SQLITE_OPEN_SUBJOURNAL'                |
-        'SQLITE_OPEN_MASTER_JOURNAL'            |
         'SQLITE_OPEN_NOMUTEX'                   |
         'SQLITE_OPEN_FULLMUTEX'                 |
         'SQLITE_OPEN_SHAREDCACHE'               |
         'SQLITE_OPEN_PRIVATECACHE'              |
-        'SQLITE_OPEN_WAL'                       |
         'SQLITE_OPEN_NOFOLLOW'                  |
         'SQLITE_DBCONFIG_MAINDBNAME'            |
         'SQLITE_DBCONFIG_ENABLE_FKEY'           |
@@ -325,30 +314,10 @@ atom_to_int_flag('SQLITE_OPEN_READWRITE') ->
     ?SQLITE_OPEN_READWRITE;
 atom_to_int_flag('SQLITE_OPEN_CREATE') ->
     ?SQLITE_OPEN_CREATE;
-atom_to_int_flag('SQLITE_OPEN_DELETEONCLOSE') ->
-    ?SQLITE_OPEN_DELETEONCLOSE;
-atom_to_int_flag('SQLITE_OPEN_EXCLUSIVE') ->
-    ?SQLITE_OPEN_EXCLUSIVE;
-atom_to_int_flag('SQLITE_OPEN_AUTOPROXY') ->
-    ?SQLITE_OPEN_AUTOPROXY;
 atom_to_int_flag('SQLITE_OPEN_URI') ->
     ?SQLITE_OPEN_URI;
 atom_to_int_flag('SQLITE_OPEN_MEMORY') ->
     ?SQLITE_OPEN_MEMORY;
-atom_to_int_flag('SQLITE_OPEN_MAIN_DB') ->
-    ?SQLITE_OPEN_MAIN_DB;
-atom_to_int_flag('SQLITE_OPEN_TEMP_DB') ->
-    ?SQLITE_OPEN_TEMP_DB;
-atom_to_int_flag('SQLITE_OPEN_TRANSIENT_DB') ->
-    ?SQLITE_OPEN_TRANSIENT_DB;
-atom_to_int_flag('SQLITE_OPEN_MAIN_JOURNAL') ->
-    ?SQLITE_OPEN_MAIN_JOURNAL;
-atom_to_int_flag('SQLITE_OPEN_TEMP_JOURNAL') ->
-    ?SQLITE_OPEN_TEMP_JOURNAL;
-atom_to_int_flag('SQLITE_OPEN_SUBJOURNAL') ->
-    ?SQLITE_OPEN_SUBJOURNAL;
-atom_to_int_flag('SQLITE_OPEN_MASTER_JOURNAL') ->
-    ?SQLITE_OPEN_MASTER_JOURNAL;
 atom_to_int_flag('SQLITE_OPEN_NOMUTEX') ->
     ?SQLITE_OPEN_NOMUTEX;
 atom_to_int_flag('SQLITE_OPEN_FULLMUTEX') ->
@@ -357,8 +326,6 @@ atom_to_int_flag('SQLITE_OPEN_SHAREDCACHE') ->
     ?SQLITE_OPEN_SHAREDCACHE;
 atom_to_int_flag('SQLITE_OPEN_PRIVATECACHE') ->
     ?SQLITE_OPEN_PRIVATECACHE;
-atom_to_int_flag('SQLITE_OPEN_WAL') ->
-    ?SQLITE_OPEN_WAL;
 atom_to_int_flag('SQLITE_OPEN_NOFOLLOW') ->
     ?SQLITE_OPEN_NOFOLLOW;
 atom_to_int_flag('SQLITE_DBCONFIG_MAINDBNAME') ->

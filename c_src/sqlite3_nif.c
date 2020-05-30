@@ -885,7 +885,7 @@ impl_sqlite3_backup_finish(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     sqlite3_backup_t* rbackup = NULL;
     GET_BACKUP(env, argv[0], &rbackup);
     int rv = sqlite3_backup_finish(rbackup->backup);
-
+    rbackup->backup = NULL;
     return enif_make_int(env, rv);
 }
 

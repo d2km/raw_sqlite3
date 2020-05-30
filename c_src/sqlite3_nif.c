@@ -62,6 +62,9 @@ static ErlNifResourceType* sqlite3_snapshot_r;
 typedef struct sqlite3_t
 {
     sqlite3* db;
+    /* db_name must be stored here becaue SQLITE_DBCONFIG_MAINDBNAME doesn't
+       copy the argument */
+    char* db_name;
 } sqlite3_t;
 
 /* sqlite3 statement resource type */
@@ -92,6 +95,7 @@ sqlite3_r_dtor(ErlNifEnv* env, void* obj)
 {
     dbg("sqlite_close_v2(%p)\n", ((sqlite3_t*)obj)->db);
     sqlite3_close_v2(((sqlite3_t*)obj)->db);
+    sqlite3_free(((sqlite3_t*)obj)->db_name);
 }
 
 static void
@@ -205,6 +209,7 @@ impl_sqlite3_open_v2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     }
 
     rdb->db = db;
+    rdb->db_name = NULL;
 
     ERL_NIF_TERM ret = enif_make_resource(env, rdb);
     enif_release_resource(rdb);
@@ -222,6 +227,9 @@ impl_sqlite3_close_v2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     int rv = sqlite3_close_v2(rdb->db);
     rdb->db = NULL;
+    if (rdb->db_name)
+        sqlite3_free(rdb->db_name);
+    rdb->db_name = NULL;
 
     return enif_make_int(env, rv);
 }
@@ -307,7 +315,13 @@ impl_sqlite3_db_config(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     if (op == SQLITE_DBCONFIG_MAINDBNAME) {
         GET_C_STR(env, argv[2], &db_name);
-        rv = sqlite3_db_config(rdb->db, op, (char*)db_name.data);
+        if (rdb->db_name)
+            sqlite3_free(rdb->db_name);
+        rdb->db_name = (char*)sqlite3_malloc64(db_name.size);
+        if (!rdb->db_name)
+            return enif_raise_exception(env, make_atom(env, "alloc_resource"));
+        memcpy(rdb->db_name, db_name.data, db_name.size);
+        rv = sqlite3_db_config(rdb->db, op, rdb->db_name);
         return enif_make_int(env, rv);
     } else {
         GET_INT(env, argv[2], &val);

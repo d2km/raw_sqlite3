@@ -293,13 +293,13 @@ sqlite3_backup_finish(_Backup) ->
 
 -spec sqlite3_backup_pagecount(Backup) -> Result
               when Backup :: sqlite3_backup(),
-                   Result :: sqlite3_error_code().
+                   Result :: integer().
 sqlite3_backup_pagecount(_Backup) ->
     not_loaded(?LINE).
 
 -spec sqlite3_backup_remaining(Backup) -> Result
               when Backup :: sqlite3_backup(),
-                   Result :: sqlite3_error_code().
+                   Result :: integer().
 sqlite3_backup_remaining(_Backup) ->
     not_loaded(?LINE).
 

@@ -758,7 +758,10 @@ impl_sqlite3_expanded_sql(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     if (!sql)
         return make_binary(env, "", 0);
 
-    return make_binary(env, sql, strlen(sql));
+    ERL_NIF_TERM ret = make_binary(env, sql, strlen(sql));
+    sqlite3_free(sql);
+
+    return ret;
 }
 
 static ERL_NIF_TERM

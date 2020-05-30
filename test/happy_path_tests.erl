@@ -73,7 +73,7 @@
 -define(FULLMUTEX, ?SQLITE_OPEN_FULLMUTEX).
 -define(MEMORY, ?SQLITE_OPEN_MEMORY).
 
-open_test_() ->
+open_v2_test_() ->
     TestCases = [{":memory:", ?CRW, "", "CRW"},
                  {"/foo", ?CRW bor ?MEMORY, "", "CRW|MEMORY"},
                  {"/tmp/open_test/foo", ?CRW, "", "CRW"},
@@ -94,7 +94,7 @@ open_test_() ->
     Cleanup = fun(_) -> ?cmd("rm -rf /tmp/open_test") end,
     {setup, Setup, Cleanup, Tests}.
 
-close_test_() ->
+close_v2_test_() ->
     Path = "/tmp/close_test/foo",
     OpenClose = fun() ->
                         {ok, Db} = sqlite3_open_v2(Path, ?CRW, ""),
@@ -192,28 +192,30 @@ db_config_test_() ->
                       ?cmd("rm -rf " ++ Path)
               end,
     ConfOpts = [
-            {?SQLITE_DBCONFIG_MAINDBNAME, "main2", ?SQLITE_OK},
-            {?SQLITE_DBCONFIG_ENABLE_FKEY, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_ENABLE_VIEW, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_ENABLE_TRIGGER, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_NO_CKPT_ON_CLOSE, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_ENABLE_QPSG, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_TRIGGER_EQP, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_DEFENSIVE, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_WRITABLE_SCHEMA, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_LEGACY_ALTER_TABLE, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_DQS_DML, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_DQS_DDL, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_TRUSTED_SCHEMA, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_LEGACY_FILE_FORMAT, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_RESET_DATABASE, 1, {?SQLITE_OK, 1}},
-            {?SQLITE_DBCONFIG_RESET_DATABASE, 0, {?SQLITE_OK, 0}}
-             ],
+                {?SQLITE_DBCONFIG_MAINDBNAME, "main2", ?SQLITE_OK},
+                {?SQLITE_DBCONFIG_ENABLE_FKEY, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_ENABLE_VIEW, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_ENABLE_TRIGGER, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_NO_CKPT_ON_CLOSE, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_ENABLE_QPSG, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_TRIGGER_EQP, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_DEFENSIVE, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_WRITABLE_SCHEMA, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_LEGACY_ALTER_TABLE, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_DQS_DML, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_DQS_DDL, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_TRUSTED_SCHEMA, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_LEGACY_FILE_FORMAT, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_RESET_DATABASE, 1, {?SQLITE_OK, 1}},
+                {?SQLITE_DBCONFIG_RESET_DATABASE, 0, {?SQLITE_OK, 0}}
+               ],
     I = fun(Db) ->
                 M = fun({Opt, Val, ExpectedRv}) ->
-                            Title = io_lib:format("sqlite3_db_config(~p, ~p)", [Opt, Val]),
+                            Title = io_lib:format(
+                                      "sqlite3_db_config(~p, ~p)", [Opt, Val]
+                                     ),
                             F = fun() ->
                                         Rv = sqlite3_db_config(Db, Opt, Val),
                                         ?assertEqual(ExpectedRv, Rv)
@@ -223,3 +225,324 @@ db_config_test_() ->
                 lists:map(M, ConfOpts)
         end,
     {setup, Setup, Cleanup, I}.
+
+set_last_insert_rowid_test() ->
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ok = sqlite3_set_last_insert_rowid(Db, 10),
+    ?assertEqual(10, sqlite3_last_insert_rowid(Db)).
+
+busy_timeout_test() ->
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    Rv = sqlite3_busy_timeout(Db, 100),
+    ?assertEqual(Rv, ?SQLITE_OK).
+
+
+extended_result_codes_test() ->
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    Rv = sqlite3_extended_result_codes(Db, 1),
+    ?assertEqual(Rv, ?SQLITE_OK).
+
+interrupt_test() ->
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ok = sqlite3_interrupt(Db).
+
+get_autocommit_test() ->
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ?assertEqual(1, sqlite3_get_autocommit(Db)),
+    ok = raw_sqlite3:exec(Db, "BEGIN"),
+    ?assertEqual(0, sqlite3_get_autocommit(Db)),
+    ok = raw_sqlite3:exec(Db, "COMMIT"),
+    ?assertEqual(1, sqlite3_get_autocommit(Db)).
+
+last_insert_rowid_test() ->
+    Sql = "CREATE TABLE t (id INTEGER PRIMARY KEY);"
+        "INSERT INTO t(id) VALUES(10);",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ok = raw_sqlite3:exec(Db, Sql),
+    ?assertEqual(10, sqlite3_last_insert_rowid(Db)).
+
+changes_test() ->
+    N = 100,
+    MakeVal = fun(I) ->
+                      lists:flatten(io_lib:format("(~B, 'hello~B')", [I, I]))
+              end,
+    Sql = "CREATE TABLE t (id INTEGER PRIMARY KEY, x TEXT);"
+        "INSERT INTO t(id, x) VALUES " ++
+        lists:join(", ", [ MakeVal(I) || I <- lists:seq(1, 100)]) ++ ";",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ok = raw_sqlite3:exec(Db, Sql),
+    ?assertEqual(N, sqlite3_changes(Db)).
+
+total_changes_test() ->
+    N = 100,
+    MakeVal = fun(I) ->
+                      lists:flatten(io_lib:format("(~B, 'hello~B')", [I, I]))
+              end,
+    Sql = "CREATE TABLE t (id INTEGER PRIMARY KEY, x TEXT);"
+        "INSERT INTO t(id, x) VALUES " ++
+        lists:join(", ", [ MakeVal(I) || I <- lists:seq(1, 100)]) ++ ";",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ok = raw_sqlite3:exec(Db, Sql),
+    ok = raw_sqlite3:exec(Db, "UPDATE t SET x=id"),
+    ?assertEqual(2*N, sqlite3_total_changes(Db)).
+
+db_filename_test_() ->
+    Path = "/tmp/db_filename_test",
+    Setup = fun() ->
+                    ?cmd("mkdir -p " ++ Path),
+                    {ok, Db} = sqlite3_open_v2(Path ++ "/foo", ?CRW, ""),
+                    Db
+            end,
+    Cleanup = fun(Db) ->
+                      sqlite3_close_v2(Db),
+                      ?cmd("rm -rf " ++ Path)
+              end,
+    Inst = fun(Db) ->
+                   fun() ->
+                           DbFname = sqlite3_db_filename(Db, "main"),
+                           DbNameBin = iolist_to_binary(DbFname),
+                           PathBin = iolist_to_binary(Path ++ "/foo"),
+                           ?assertEqual(PathBin, DbNameBin)
+                   end
+           end,
+    {setup, Setup, Cleanup, Inst}.
+
+db_readonly_test_() ->
+    Path = "/tmp/db_readonly_test",
+    Sql = "ATTACH DATABASE 'file:" ++ Path ++ "/ro?mode=ro' AS ro",
+    Setup = fun() ->
+                    ?cmd("mkdir -p " ++ Path),
+                    {ok, DbRO} = sqlite3_open_v2(Path ++ "/ro", ?CRW, ""),
+                    ?SQLITE_OK = sqlite3_close_v2(DbRO),
+                    {ok, Db} = sqlite3_open_v2(Path ++ "/foo", ?CRW, ""),
+                    ok = raw_sqlite3:exec(Db, Sql),
+                    Db
+            end,
+    Cleanup = fun(Db) ->
+                      sqlite3_close_v2(Db),
+                      ?cmd("rm -rf " ++ Path)
+              end,
+    Inst = fun(Db) ->
+                   [?_assertEqual(0, sqlite3_db_readonly(Db, "main")),
+                    ?_assertEqual(1, sqlite3_db_readonly(Db, "ro")),
+                    ?_assertEqual(-1, sqlite3_db_readonly(Db, "nonexistent"))]
+           end,
+    {setup, Setup, Cleanup, Inst}.
+
+db_status_test_() ->
+    Path = "/tmp/db_status_test",
+    Setup = fun() ->
+                    ?cmd("mkdir -p " ++ Path),
+                    {ok, Db} = sqlite3_open_v2(Path ++ "/foo", ?CRW, ""),
+                    Db
+            end,
+    Cleanup = fun(Db) ->
+                      sqlite3_close_v2(Db),
+                      ?cmd("rm -rf " ++ Path)
+              end,
+    Flags = [?SQLITE_DBSTATUS_LOOKASIDE_USED,
+             ?SQLITE_DBSTATUS_CACHE_USED,
+             ?SQLITE_DBSTATUS_SCHEMA_USED,
+             ?SQLITE_DBSTATUS_STMT_USED,
+             ?SQLITE_DBSTATUS_LOOKASIDE_HIT,
+             ?SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE,
+             ?SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL,
+             ?SQLITE_DBSTATUS_CACHE_HIT,
+             ?SQLITE_DBSTATUS_CACHE_MISS,
+             ?SQLITE_DBSTATUS_CACHE_WRITE,
+             ?SQLITE_DBSTATUS_DEFERRED_FKS,
+             ?SQLITE_DBSTATUS_CACHE_USED_SHARED,
+             ?SQLITE_DBSTATUS_CACHE_SPILL],
+    T = fun(Flag, Db) ->
+                Title = io_lib:format("sqlite3_db_status(~B, 0)", [Flag]),
+                F = fun() ->
+                            Rv = sqlite3_db_status(Db, Flag, 0),
+                            ?assertMatch({L , H} when is_integer(L)
+                                                      andalso is_integer(H),
+                                                      Rv)
+                    end,
+                {lists:flatten(Title), F}
+        end,
+    Inst = fun(Db) ->
+                   [T(Flag, Db) || Flag <- Flags]
+           end,
+    {setup, Setup, Cleanup, Inst}.
+
+prepare_v2_test() ->
+    Leftover = " CREATE TABLE t2(c3 TEXT)",
+    Sql = "CREATE TABLE t1(c1 TEXT, c2 TEXT);" ++ Leftover,
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    Rv = sqlite3_prepare_v2(Db, Sql),
+    ?assertMatch({ok, _, _}, Rv),
+    {ok, _Stmt, Leftover1} = Rv,
+    LeftoverBin = iolist_to_binary(Leftover),
+    Leftover1Bin = iolist_to_binary(Leftover1),
+    ?assertEqual(LeftoverBin, Leftover1Bin).
+
+bind_and_step_test() ->
+    Sql1 = "CREATE TABLE "
+        "t(c_int INTEGER, c_text TEXT, c_blob BLOB, c_bool BOOL, c_opt TEXT)",
+    Sql2 = "INSERT INTO t(c_int, c_text, c_blob, c_bool, c_opt)"
+        " VALUES (?, ?, ?, ?, ?)",
+    Sql3 = "SELECT * FROM t",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ?assertEqual(ok, raw_sqlite3:exec(Db, Sql1)),
+    {ok, Stmt2, _} = sqlite3_prepare_v2(Db, Sql2),
+    Params = [1, {text, "hello"}, {blob, <<"world">>}, false, nil],
+    ?assertEqual(ok, sqlite3_bind(Stmt2, Params)),
+    ?assertEqual(ok, sqlite3_step(Stmt2)),
+    {ok, Stmt3, _} = sqlite3_prepare_v2(Db, Sql3),
+    {Int, Text, Blob, Bool, nil} = sqlite3_step(Stmt3),
+    ?assertEqual(iolist_to_binary(Text), <<"hello">>),
+    ?assertEqual(iolist_to_binary(Blob), <<"world">>),
+    ?assertEqual(1, Int),
+    ?assertEqual(0, Bool).
+
+finalize_test() ->
+    Sql = "CREATE TABLE t(c TEXT)",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    {ok, Stmt, _} = sqlite3_prepare_v2(Db, Sql),
+    ?assertEqual(ok, sqlite3_step(Stmt)),
+    ?assertEqual(?SQLITE_OK, sqlite3_finalize(Stmt)),
+    %% finalize should be idempotent
+    ?assertEqual(?SQLITE_OK, sqlite3_finalize(Stmt)).
+
+data_count_test() ->
+    Sql1 = "CREATE TABLE "
+        "t(c_int INTEGER, c_text TEXT, c_blob BLOB, c_bool BOOL, c_opt TEXT)",
+    Sql2 = "INSERT INTO t(c_int, c_text, c_blob, c_bool, c_opt)"
+        " VALUES (?, ?, ?, ?, ?)",
+    Sql3 = "SELECT * FROM t",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ?assertEqual(ok, raw_sqlite3:exec(Db, Sql1)),
+    {ok, Stmt2, _} = sqlite3_prepare_v2(Db, Sql2),
+    Params = [1, {text, "hello"}, {blob, <<"world">>}, false, nil],
+    ?assertEqual(ok, sqlite3_bind(Stmt2, Params)),
+    ?assertEqual(ok, sqlite3_step(Stmt2)),
+    {ok, Stmt3, _} = sqlite3_prepare_v2(Db, Sql3),
+    ?assertMatch({_Int, _Text, _Blob, _Bool, nil}, sqlite3_step(Stmt3)),
+    ?assertEqual(5, sqlite3_data_count(Stmt3)),
+    ?assertEqual(ok, sqlite3_step(Stmt3)),
+    ?assertEqual(0, sqlite3_data_count(Stmt3)).
+
+sql_test() ->
+    Sql = <<"CREATE TABLE t(c TEXT)">>,
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    {ok, Stmt, _} = sqlite3_prepare_v2(Db, Sql),
+    SqlRv = sqlite3_sql(Stmt),
+    SqlRvBin = iolist_to_binary(SqlRv),
+    ?assertEqual(Sql, SqlRvBin).
+
+expanded_sql_test() ->
+    Sql = "SELECT upper(?)",
+    ExpandedSql = <<"SELECT upper('hello')">>,
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    {ok, Stmt, _} = sqlite3_prepare_v2(Db, Sql),
+    ?assertEqual(ok, sqlite3_bind(Stmt, [{text, "hello"}])),
+    ?assertEqual(ExpandedSql, sqlite3_expanded_sql(Stmt)).
+
+normalized_sql_test() ->
+    Sql = "SELECT upper(?)",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    {ok, Stmt, _} = sqlite3_prepare_v2(Db, Sql),
+    ?assertEqual(ok, sqlite3_bind(Stmt, [{text, "hello"}])),
+    %% NOTE: from https://sqlite.org/c3ref/expanded_sql.html
+    %% > The sqlite3_normalized_sql(P) interface returns a pointer to a UTF-8
+    %% > string containing the normalized SQL text of prepared statement P. The
+    %% > semantics used to normalize a SQL statement are unspecified and
+    %% > subject to change.
+    ?assertMatch(S when is_binary(S), sqlite3_normalized_sql(Stmt)).
+
+stmt_busy_test() ->
+    Sql = "SELECT sqlite_version()",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    {ok, Stmt, _} = sqlite3_prepare_v2(Db, Sql),
+    ?assertEqual(0, sqlite3_stmt_busy(Stmt)),
+    ?assertMatch({_}, sqlite3_step(Stmt)),
+    ?assertEqual(1, sqlite3_stmt_busy(Stmt)),
+    ?assertEqual(?SQLITE_OK, sqlite3_reset(Stmt)),
+    ?assertEqual(0, sqlite3_stmt_busy(Stmt)).
+
+stmt_isexplain_test() ->
+    Sql = "SELECT sqlite_version()",
+    ExplainSql = "EXPLAIN SELECT sqlite_version()",
+    ExplainPlanSql = "EXPLAIN QUERY PLAN SELECT sqlite_version()",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    {ok, Stmt1, _} = sqlite3_prepare_v2(Db, Sql),
+    ?assertEqual(0, sqlite3_stmt_isexplain(Stmt1)),
+    {ok, Stmt2, _} = sqlite3_prepare_v2(Db, ExplainSql),
+    ?assertEqual(1, sqlite3_stmt_isexplain(Stmt2)),
+    {ok, Stmt3, _} = sqlite3_prepare_v2(Db, ExplainPlanSql),
+    ?assertEqual(2, sqlite3_stmt_isexplain(Stmt3)).
+
+stmt_readonly_test() ->
+    Sql1 = "SELECT sqlite_version()",
+    Sql2 = "CREATE TABLE t(c TEXT)",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    {ok, Stmt1, _} = sqlite3_prepare_v2(Db, Sql1),
+    ?assertEqual(1, sqlite3_stmt_readonly(Stmt1)),
+    {ok, Stmt2, _} = sqlite3_prepare_v2(Db, Sql2),
+    ?assertEqual(0, sqlite3_stmt_readonly(Stmt2)).
+
+stmt_status_test_() ->
+    %% NOTE: it's not clear how to test that exactly because actual values may differ
+    %% accross SQLite versions and different environments.
+    Path = "/tmp/stmt_status_test",
+    Setup = fun() ->
+                    ?cmd("mkdir -p " ++ Path),
+                    {ok, Db} = sqlite3_open_v2(Path ++ "/foo", ?CRW, ""),
+                    Db
+            end,
+    Cleanup = fun(Db) ->
+                      sqlite3_close_v2(Db),
+                      ?cmd("rm -rf " ++ Path)
+              end,
+    Flags = [
+             ?SQLITE_STMTSTATUS_FULLSCAN_STEP,
+             ?SQLITE_STMTSTATUS_SORT,
+             ?SQLITE_STMTSTATUS_AUTOINDEX,
+             ?SQLITE_STMTSTATUS_VM_STEP,
+             ?SQLITE_STMTSTATUS_REPREPARE,
+             ?SQLITE_STMTSTATUS_RUN,
+             ?SQLITE_STMTSTATUS_MEMUSED
+            ],
+    T = fun(Flag, Db) ->
+                Title = io_lib:format("sqlite3_stmt_status(~B, 0)", [Flag]),
+                {ok, Stmt, _} = sqlite3_prepare_v2(Db, "SELECT sqlite_version()"),
+                F = fun() ->
+                            Rv = sqlite3_stmt_status(Stmt, Flag, 0),
+                            ?assertMatch(R when is_integer(R), Rv)
+                    end,
+                {lists:flatten(Title), F}
+        end,
+    Inst = fun(Db) ->
+                   [T(Flag, Db) || Flag <- Flags]
+           end,
+    {setup, Setup, Cleanup, Inst}.
+
+backup_test_() ->
+    Path = "/tmp/backup_test",
+    PathDb = Path ++ "/foo",
+    MakeVal = fun(I) ->
+                      lists:flatten(io_lib:format("(~B, 'hello~B')", [I, I]))
+              end,
+    InsertSql = "CREATE TABLE t (id INTEGER PRIMARY KEY, x TEXT);"
+        "INSERT INTO t(id, x) VALUES " ++
+        lists:join(", ", [ MakeVal(I) || I <- lists:seq(1, 100)]) ++ ";",
+    Setup = fun() -> ?cmd("mkdir -p " ++ Path) end,
+    Cleanup = fun(_) -> ?cmd("rm -rf " ++ Path) end,
+    T = fun() ->
+                {ok, Db} = sqlite3_open_v2(PathDb, ?CRW, ""),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, InsertSql)),
+                {ok, DbMem} = sqlite3_open_v2(":memory:", ?CRW, ""),
+                {ok, Backup} = sqlite3_backup_init(DbMem, "main", Db, "main"),
+                ?assertEqual(?SQLITE_OK, sqlite3_backup_step(Backup, 1)),
+                PageCount = sqlite3_backup_pagecount(Backup),
+                Remaining = sqlite3_backup_remaining(Backup),
+                ?assertMatch(X when is_integer(X) andalso X > 0, PageCount),
+                ?assertEqual(PageCount - 1, Remaining),
+                ?assertEqual(?SQLITE_DONE, sqlite3_backup_step(Backup, -1)),
+                ?assertEqual(0, sqlite3_backup_remaining(Backup)),
+                ?assertEqual(?SQLITE_OK, sqlite3_backup_finish(Backup))
+        end,
+    {setup, Setup, Cleanup, T}.

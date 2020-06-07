@@ -307,19 +307,32 @@ sqlite3_backup_remaining(_Backup) ->
 %%%%%%%%%%%%%
 %% BLOB API %
 %%%%%%%%%%%%%
-
+-spec sqlite3_blob_open(sqlite3(), DbName, TabName, ColumnName, RowId, Flags) -> Result
+              when DbName     :: sqlite3_str(),
+                   TabName    :: sqlite3_str(),
+                   ColumnName :: sqlite3_str(),
+                   RowId      :: integer(),
+                   Flags      :: integer(),
+                   Result     :: {ok, sqlite3_blob()} | {error, sqlite3_error_code()}.
 sqlite3_blob_open(_Db, _DbName, _TabName, _ColumnName, _Rowid, _Flags) ->
     not_loaded(?LINE).
 
 sqlite3_blob_bytes(_Blob) ->
     not_loaded(?LINE).
 
+-spec sqlite3_blob_close(sqlite3_blob()) -> sqlite3_error_code().
 sqlite3_blob_close(_Blob) ->
     not_loaded(?LINE).
 
+-spec sqlite3_blob_read(sqlite3_blob(), N, Offset) -> Result
+              when N      :: non_neg_integer(),
+                   Offset :: non_neg_integer(),
+                   Result :: {ok, binary()} | {error, sqlite3_error_code()}.
 sqlite3_blob_read(_Blob, _N, _Offset) ->
     not_loaded(?LINE).
 
+-spec sqlite3_blob_reopen(sqlite3_blob(), Rowid) -> sqlite3_error_code()
+              when Rowid :: integer().
 sqlite3_blob_reopen(_Blob, _Rowid) ->
     not_loaded(?LINE).
 

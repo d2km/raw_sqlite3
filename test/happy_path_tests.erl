@@ -546,3 +546,25 @@ backup_test_() ->
                 ?assertEqual(?SQLITE_OK, sqlite3_backup_finish(Backup))
         end,
     {setup, Setup, Cleanup, T}.
+
+blob_test_() ->
+    Path = "/tmp/blob_test",
+    Sql = "CREATE TABLE t (id INTEGER PRIMARY KEY, x TEXT);"
+        "INSERT INTO t(id, x) VALUES (1, zeroblob(10)), (2, NULL);",
+    Setup = fun() -> ?cmd("mkdir -p " ++ Path) end,
+    Cleanup = fun(_) -> ?cmd("rm -rf " ++ Path) end,
+    T = fun() ->
+                {ok, Db} = sqlite3_open_v2(Path ++ "/foo", ?CRW, ""),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, Sql)),
+                {ok, Blob} = sqlite3_blob_open(Db, "main", "t", "x", 1, 1),
+                ?assertEqual(10, sqlite3_blob_bytes(Blob)),
+                ?assertEqual(ok, sqlite3_blob_write(Blob, "Greetings!", 0)),
+                Rv = sqlite3_blob_read(Blob, 10, 0),
+                ?assertMatch({ok, <<"Greetings!">>}, Rv),
+                Sql2 = "UPDATE t SET x=? WHERE id=2",
+                ok = raw_sqlite3:exec(Db, Sql2, [{blob, "hello world"}]),
+                ?assertEqual(?SQLITE_OK, sqlite3_blob_reopen(Blob, 2)),
+                Rv2 = sqlite3_blob_read(Blob, 11, 0),
+                ?assertMatch({ok, <<"hello world">>}, Rv2)
+        end,
+    {setup, Setup, Cleanup, T}.

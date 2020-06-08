@@ -12,6 +12,7 @@
          exec/2, exec/3,
          fold/4, fold/5,
          map/3, map/4,
+         with_trxn/2,
          make_flags/1,
          atom_to_int_flag/1,
          int_to_bool/1,
@@ -290,6 +291,22 @@ do_map(Stmt, Fun, Acc) ->
             Err;
         Row ->
             do_map(Stmt, Fun, [Fun(Row) | Acc])
+    end.
+
+
+with_trxn(Db, F) ->
+    case exec(Db, "BEGIN") of
+        ok ->
+            try
+                Rv = F(),
+                ok = exec(Db, "COMMIT"),
+                Rv
+            catch
+                _:Reason:Stacktrace ->
+                    ok = exec(Db, "ROLLBACK"),
+                    {error, #{reason => Reason, stacktrace => Stacktrace}}
+            end;
+        {error, _} = Err -> Err
     end.
 
 

@@ -568,3 +568,117 @@ blob_test_() ->
                 ?assertMatch({ok, <<"hello world">>}, Rv2)
         end,
     {setup, Setup, Cleanup, T}.
+
+err_test() ->
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    {error, Rv} = sqlite3_prepare_v2(Db, "creat table foo(x)"),
+    ?assertEqual(?SQLITE_ERROR, Rv),
+    ?assertEqual(?SQLITE_ERROR, sqlite3_errcode(Db)),
+    ?assertEqual(?SQLITE_ERROR, sqlite3_extended_errcode(Db)),
+    ?assertEqual(<<"near \"creat\": syntax error">>, sqlite3_errmsg(Db)),
+    ?assertEqual(<<"SQL logic error">>, sqlite3_errstr(Rv)).
+
+
+wal_checkpoint_test_() ->
+    Path = "/tmp/wal_checkpoint_test",
+    Sql = "PRAGMA journal_mode=WAL;"
+        "CREATE TABLE t(x TEXT)",
+    Sql2 = "INSERT INTO t(x) VALUES(?)",
+    Setup = fun() -> ?cmd("mkdir -p " ++ Path) end,
+    Cleanup = fun(_) -> ?cmd("rm -rf " ++ Path) end,
+    T = fun() ->
+                {ok, Db} = sqlite3_open_v2(Path ++ "/foo", ?CRW, ""),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, Sql)),
+                ?assertEqual(?SQLITE_OK, sqlite3_wal_autocheckpoint(Db, 10)),
+                Rv1 = sqlite3_wal_checkpoint_v2(Db, "main", ?SQLITE_CHECKPOINT_PASSIVE),
+                ?assertMatch({ok, {2, 2}}, Rv1),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, Sql2, [{text, "hello"}])),
+                Rv2 = sqlite3_wal_checkpoint_v2(Db, "main", ?SQLITE_CHECKPOINT_FULL),
+                ?assertMatch({ok, {1, 1}}, Rv2),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, Sql2, [{text, "world"}])),
+                Rv3 = sqlite3_wal_checkpoint_v2(Db, "main", ?SQLITE_CHECKPOINT_RESTART),
+                ?assertMatch({ok, {1, 1}}, Rv3),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, Sql2, [{text, "!"}])),
+                Rv4 = sqlite3_wal_checkpoint_v2(Db, "main", ?SQLITE_CHECKPOINT_TRUNCATE),
+                ?assertMatch({ok, {0, 0}}, Rv4)
+        end,
+    {setup, Setup, Cleanup, T}.
+
+compileoption_test() ->
+    OptList = fun F(N) ->
+                     case sqlite3_compileoption_get(N) of
+                         nil -> [];
+                         Opt -> [Opt | F(N+1)]
+                     end
+              end,
+    [?assertEqual(1, sqlite3_compileoption_used(Opt)) || Opt <- OptList(0)].
+
+-define(VSN, <<"3.32.0">>).
+-define(VSN_NUM, 3032000).
+libversion_test() ->
+    ?assertEqual(?VSN, sqlite3_libversion()),
+    ?assertEqual(?VSN_NUM, sqlite3_libversion_number()).
+
+-define(SOURCE_ID, <<"2020-05-22 17:46:16 5998789c9c744bce92e4cff7636bba800a75574243d6977e1fc8281e360f8d5a">>).
+sourceid_test() ->
+    ?assertEqual(?SOURCE_ID, sqlite3_sourceid()).
+
+complete_test() ->
+    ?assertEqual(1, sqlite3_complete("CREATE foo;")).
+
+%% sqlite3_snapshot_get/2,
+%% sqlite3_snapshot_open/3,
+%% sqlite3_snapshot_cmp/2,
+%% sqlite3_snapshot_free/1,
+%% sqlite3_snapshot_recover/2,
+snapshot_test_() ->
+    Path = "/tmp/snapshot_test",
+    Sql = "PRAGMA journal_mode=WAL;"
+        "CREATE TABLE t(x TEXT)",
+    Sql2 = "INSERT INTO t(x) VALUES(?)",
+    Setup = fun() -> ?cmd("mkdir -p " ++ Path) end,
+    Cleanup = fun(_) -> ?cmd("rm -rf " ++ Path) end,
+    T = fun() ->
+                {ok, Db} = sqlite3_open_v2(Path ++ "/foo", ?CRW, ""),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, Sql)),
+                GetSnapshot = fun() -> sqlite3_snapshot_get(Db, "main") end,
+                Rv1 = raw_sqlite3:with_trxn(Db, GetSnapshot),
+                ?assertMatch({ok, _}, Rv1),
+                {ok, Snapshot1} = Rv1,
+                ?assertEqual(ok, raw_sqlite3:exec(Db, Sql2, [{text, "hello"}])),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, Sql2, [{text, "world"}])),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, "BEGIN")),
+                ?assertEqual(?SQLITE_OK, sqlite3_snapshot_open(Db, "main", Snapshot1)),
+                Rows = raw_sqlite3:q(Db, "SELECT * FROM t"),
+                ?assertEqual(0, length(Rows)),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, "COMMIT")),
+                Rv2 = raw_sqlite3:with_trxn(Db, GetSnapshot),
+                ?assertMatch({ok, _}, Rv2),
+                {ok, Snapshot2} = Rv2,
+                Rv3 = sqlite3_snapshot_cmp(Snapshot1, Snapshot2),
+                ?assert(Rv3 < 0),
+                ?assertEqual(ok, sqlite3_snapshot_free(Snapshot1)),
+                ?assertEqual(ok, sqlite3_snapshot_free(Snapshot2)),
+                ?assertEqual(?SQLITE_OK, sqlite3_snapshot_recover(Db, "main"))
+        end,
+    {setup, Setup, Cleanup, T}.
+
+serialize_test_() ->
+    Path = "/tmp/snapshot_test",
+    Sql = "PRAGMA journal_mode=WAL;"
+        "CREATE TABLE t(x TEXT);"
+        "INSERT INTO t(x) VALUES ('hello'), ('world')",
+    Setup = fun() -> ?cmd("mkdir -p " ++ Path) end,
+    Cleanup = fun(_) -> ?cmd("rm -rf " ++ Path) end,
+    T = fun() ->
+                {ok, Db} = sqlite3_open_v2(Path ++ "/foo", ?CRW, ""),
+                ?assertEqual(ok, raw_sqlite3:exec(Db, Sql)),
+                Rv = sqlite3_serialize(Db, "main"),
+                ?assertMatch({ok, _}, Rv),
+                {ok, S} = Rv,
+                {ok, Db2} = sqlite3_open_v2(":memory:", ?CRW, ""),
+                ?assertEqual(?SQLITE_OK, sqlite3_deserialize(Db2, "main", S)),
+                Rv2 = raw_sqlite3:q(Db, "SELECT * FROM t"),
+                ?assertMatch([{<<"hello">>}, {<<"world">>}], Rv2)
+        end,
+    {setup, Setup, Cleanup, T}.

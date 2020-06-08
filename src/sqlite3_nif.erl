@@ -381,7 +381,7 @@ sqlite3_wal_checkpoint_v2(_Db, _DbName, _Mode) ->
     not_loaded(?LINE).
 
 %% Global informational/utility functions
--spec sqlite3_compileoption_get(N :: integer()) -> binary().
+-spec sqlite3_compileoption_get(N :: integer()) -> binary() | nil.
 sqlite3_compileoption_get(_N) ->
     not_loaded(?LINE).
 

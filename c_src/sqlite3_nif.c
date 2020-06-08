@@ -1178,8 +1178,10 @@ impl_sqlite3_compileoption_get(ErlNifEnv* env,
     GET_INT(env, argv[0], &opt);
 
     const char* opt_val = sqlite3_compileoption_get(opt);
-
-    return make_binary(env, opt_val, strlen(opt_val));
+    if (opt_val != NULL)
+        return make_binary(env, opt_val, strlen(opt_val));
+    else
+        return make_atom(env, "nil");
 }
 
 static ERL_NIF_TERM

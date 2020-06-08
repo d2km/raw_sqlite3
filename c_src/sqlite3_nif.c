@@ -1312,6 +1312,22 @@ impl_sqlite3_snapshot_cmp(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+impl_sqlite3_snapshot_free(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    CHECK_ARGC(argc, 1);
+
+    sqlite3_snapshot_t* rsnapshot = NULL;
+    if (!enif_get_resource(
+          env, argv[0], sqlite3_snapshot_r, (void**)&rsnapshot))
+        return enif_make_badarg(env);
+
+    sqlite3_snapshot_free(rsnapshot->snapshot);
+    rsnapshot->snapshot = NULL;
+
+    return make_atom(env, "ok");
+}
+
+static ERL_NIF_TERM
 impl_sqlite3_snapshot_recover(ErlNifEnv* env,
                               int argc,
                               const ERL_NIF_TERM argv[])
@@ -1508,6 +1524,10 @@ static ErlNifFunc nif_funcs[] = {
     { "sqlite3_snapshot_recover",
       2,
       impl_sqlite3_snapshot_recover,
+      ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_snapshot_free",
+      1,
+      impl_sqlite3_snapshot_free,
       ERL_NIF_DIRTY_JOB_IO_BOUND },
     { "sqlite3_serialize",
       2,

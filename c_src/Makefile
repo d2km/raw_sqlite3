@@ -38,7 +38,7 @@ C_SRC_OUTPUT ?= $(CURDIR)/../priv/$(PROJECT).so
 
 UNAME_SYS := $(shell uname -s)
 ifeq ($(UNAME_SYS), Darwin)
-	CC ?= cc
+n	CC ?= cc
 	CFLAGS ?= -std=c99 -arch x86_64 -finline-functions -Wall -Wmissing-prototypes
 	LDFLAGS ?= -arch x86_64  -flat_namespace  -undefined suppress
 else ifeq ($(UNAME_SYS), FreeBSD)
@@ -61,16 +61,19 @@ endif
 
 LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lerl_interface -lei
 
-SOURCES := $(shell find $(C_SRC_DIR) -type f \( -name "*.c" -o -name "*.C" -o -name "*.cc" -o -name "*.cpp" \))
-OBJECTS = $(addsuffix .o, $(basename $(SOURCES)))
-
 COMPILE_C = $(CC) $(CFLAGS) -c
+
+OBJECTS = sqlite3_nif.o sqlite3/sqlite3.o
 
 $(C_SRC_OUTPUT): $(OBJECTS)
 	@mkdir -p $(BASEDIR)/priv/
 	$(CC) $(OBJECTS) $(LDFLAGS) $(LDLIBS) -o $(C_SRC_OUTPUT)
 
-%.o: %.c
+sqlite3_nif.o: sqlite3_nif.c sqlite3/sqlite3.h
 	$(COMPILE_C) $(OUTPUT_OPTION) $<
+
+sqlite3/sqlite3.o: sqlite3/sqlite3.c
+	$(COMPILE_C) $(OUTPUT_OPTION) $<
+
 clean:
 	@rm -f $(C_SRC_OUTPUT) $(OBJECTS)

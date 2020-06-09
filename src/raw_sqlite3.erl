@@ -1,3 +1,10 @@
+%% @doc Convenience and utility functions for the raw_sqlite3 library.
+%%
+%% NOTE: Currently the interface of the module should NOT be considered stable
+%% since it's mostly a convenience, high-level functions. Users of the library
+%% are expected to use sqltite3_nif module directly to build their own
+%% high-level primitives since its interface is as stable as the SQLite C API
+%% and is thoroughly type-specced and covered by tests.
 -module(raw_sqlite3).
 
 -include_lib("raw_sqlite3/include/sqlite3_nif.hrl").
@@ -19,145 +26,6 @@
          bool_to_int/1,
          err_to_atom/1,
          expand_error/1, expand_error/2]).
-
--export_type([error_code/0,
-             extended_error_code/0]).
-
--type error_code() ::
-        'SQLITE_OK'         |
-        'SQLITE_ERROR'      |
-        'SQLITE_INTERNAL'   |
-        'SQLITE_PERM'       |
-        'SQLITE_ABORT'      |
-        'SQLITE_BUSY'       |
-        'SQLITE_LOCKED'     |
-        'SQLITE_NOMEM'      |
-        'SQLITE_READONLY'   |
-        'SQLITE_INTERRUPT'  |
-        'SQLITE_IOERR'      |
-        'SQLITE_CORRUPT'    |
-        'SQLITE_NOTFOUND'   |
-        'SQLITE_FULL'       |
-        'SQLITE_CANTOPEN'   |
-        'SQLITE_PROTOCOL'   |
-        'SQLITE_EMPTY'      |
-        'SQLITE_SCHEMA'     |
-        'SQLITE_TOOBIG'     |
-        'SQLITE_CONSTRAINT' |
-        'SQLITE_MISMATCH'   |
-        'SQLITE_MISUSE'     |
-        'SQLITE_NOLFS'      |
-        'SQLITE_AUTH'       |
-        'SQLITE_FORMAT'     |
-        'SQLITE_RANGE'      |
-        'SQLITE_NOTADB'     |
-        'SQLITE_NOTICE'     |
-        'SQLITE_WARNING'    |
-        'SQLITE_ROW'        |
-        'SQLITE_DONE'.
-
-
--type extended_error_code() ::
-        'SQLITE_ERROR_MISSING_COLLSEQ'          |
-        'SQLITE_ERROR_RETRY'                    |
-        'SQLITE_ERROR_SNAPSHOT'                 |
-        'SQLITE_IOERR_READ'                     |
-        'SQLITE_IOERR_SHORT_READ'               |
-        'SQLITE_IOERR_WRITE'                    |
-        'SQLITE_IOERR_FSYNC'                    |
-        'SQLITE_IOERR_DIR_FSYNC'                |
-        'SQLITE_IOERR_TRUNCATE'                 |
-        'SQLITE_IOERR_FSTAT'                    |
-        'SQLITE_IOERR_UNLOCK'                   |
-        'SQLITE_IOERR_RDLOCK'                   |
-        'SQLITE_IOERR_DELETE'                   |
-        'SQLITE_IOERR_BLOCKED'                  |
-        'SQLITE_IOERR_NOMEM'                    |
-        'SQLITE_IOERR_ACCESS'                   |
-        'SQLITE_IOERR_CHECKRESERVEDLOCK'        |
-        'SQLITE_IOERR_LOCK'                     |
-        'SQLITE_IOERR_CLOSE'                    |
-        'SQLITE_IOERR_DIR_CLOSE'                |
-        'SQLITE_IOERR_SHMOPEN'                  |
-        'SQLITE_IOERR_SHMSIZE'                  |
-        'SQLITE_IOERR_SHMLOCK'                  |
-        'SQLITE_IOERR_SHMMAP'                   |
-        'SQLITE_IOERR_SEEK'                     |
-        'SQLITE_IOERR_DELETE_NOENT'             |
-        'SQLITE_IOERR_MMAP'                     |
-        'SQLITE_IOERR_GETTEMPPATH'              |
-        'SQLITE_IOERR_CONVPATH'                 |
-        'SQLITE_IOERR_VNODE'                    |
-        'SQLITE_IOERR_AUTH'                     |
-        'SQLITE_IOERR_BEGIN_ATOMIC'             |
-        'SQLITE_IOERR_COMMIT_ATOMIC'            |
-        'SQLITE_IOERR_ROLLBACK_ATOMIC'          |
-        'SQLITE_IOERR_DATA'                     |
-        'SQLITE_LOCKED_SHAREDCACHE'             |
-        'SQLITE_LOCKED_VTAB'                    |
-        'SQLITE_BUSY_RECOVERY'                  |
-        'SQLITE_BUSY_SNAPSHOT'                  |
-        'SQLITE_BUSY_TIMEOUT'                   |
-        'SQLITE_CANTOPEN_NOTEMPDIR'             |
-        'SQLITE_CANTOPEN_ISDIR'                 |
-        'SQLITE_CANTOPEN_FULLPATH'              |
-        'SQLITE_CANTOPEN_CONVPATH'              |
-        'SQLITE_CANTOPEN_DIRTYWAL'              |
-        'SQLITE_CANTOPEN_SYMLINK'               |
-        'SQLITE_CORRUPT_VTAB'                   |
-        'SQLITE_CORRUPT_SEQUENCE'               |
-        'SQLITE_CORRUPT_INDEX'                  |
-        'SQLITE_READONLY_RECOVERY'              |
-        'SQLITE_READONLY_CANTLOCK'              |
-        'SQLITE_READONLY_ROLLBACK'              |
-        'SQLITE_READONLY_DBMOVED'               |
-        'SQLITE_READONLY_CANTINIT'              |
-        'SQLITE_READONLY_DIRECTORY'             |
-        'SQLITE_ABORT_ROLLBACK'                 |
-        'SQLITE_CONSTRAINT_CHECK'               |
-        'SQLITE_CONSTRAINT_COMMITHOOK'          |
-        'SQLITE_CONSTRAINT_FOREIGNKEY'          |
-        'SQLITE_CONSTRAINT_FUNCTION'            |
-        'SQLITE_CONSTRAINT_NOTNULL'             |
-        'SQLITE_CONSTRAINT_PRIMARYKEY'          |
-        'SQLITE_CONSTRAINT_TRIGGER'             |
-        'SQLITE_CONSTRAINT_UNIQUE'              |
-        'SQLITE_CONSTRAINT_VTAB'                |
-        'SQLITE_CONSTRAINT_ROWID'               |
-        'SQLITE_CONSTRAINT_PINNED'              |
-        'SQLITE_NOTICE_RECOVER_WAL'             |
-        'SQLITE_NOTICE_RECOVER_ROLLBACK'        |
-        'SQLITE_WARNING_AUTOINDEX'              |
-        'SQLITE_AUTH_USER'                      |
-        'SQLITE_OK_LOAD_PERMANENTLY'            |
-        'SQLITE_OK_SYMLINK'                     |
-        'SQLITE_OPEN_READONLY'                  |
-        'SQLITE_OPEN_READWRITE'                 |
-        'SQLITE_OPEN_CREATE'                    |
-        'SQLITE_OPEN_URI'                       |
-        'SQLITE_OPEN_MEMORY'                    |
-        'SQLITE_OPEN_NOMUTEX'                   |
-        'SQLITE_OPEN_FULLMUTEX'                 |
-        'SQLITE_OPEN_SHAREDCACHE'               |
-        'SQLITE_OPEN_PRIVATECACHE'              |
-        'SQLITE_OPEN_NOFOLLOW'                  |
-        'SQLITE_DBCONFIG_MAINDBNAME'            |
-        'SQLITE_DBCONFIG_ENABLE_FKEY'           |
-        'SQLITE_DBCONFIG_ENABLE_TRIGGER'        |
-        'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER' |
-        'SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION' |
-        'SQLITE_DBCONFIG_NO_CKPT_ON_CLOSE'      |
-        'SQLITE_DBCONFIG_ENABLE_QPSG'           |
-        'SQLITE_DBCONFIG_TRIGGER_EQP'           |
-        'SQLITE_DBCONFIG_RESET_DATABASE'        |
-        'SQLITE_DBCONFIG_DEFENSIVE'             |
-        'SQLITE_DBCONFIG_WRITABLE_SCHEMA'       |
-        'SQLITE_DBCONFIG_LEGACY_ALTER_TABLE'    |
-        'SQLITE_DBCONFIG_DQS_DML'               |
-        'SQLITE_DBCONFIG_DQS_DDL'               |
-        'SQLITE_DBCONFIG_ENABLE_VIEW'           |
-        'SQLITE_DBCONFIG_LEGACY_FILE_FORMAT'    |
-        'SQLITE_DBCONFIG_TRUSTED_SCHEMA'.
 
 open(DbFile) ->
     open(DbFile, ?SQLITE_OPEN_READWRITE bor ?SQLITE_OPEN_CREATE).

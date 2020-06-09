@@ -47,8 +47,8 @@ started guide".
 File `include/sqlite3_nif.hrl` defines macros for C constants.
 
 The `raw_sqlite3` module contains a few convenience and utility functions to
-convert between C constants and Erlang atoms, as well as provide human-readable
-error messages.
+convert between C constants and Erlang atoms, as well as human-readable error
+messages.
 
 
 Build

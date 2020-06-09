@@ -5,10 +5,16 @@
 #ifdef DEBUG
 #include <stdio.h>
 #define dbg(...) enif_fprintf(stderr, __VA_ARGS__)
-#else
-#define dbg(...)                                                               \
+
+#define CHECK_ARGC(what, n)                                                    \
     do {                                                                       \
+        if ((what) != (n))                                                     \
+            return enif_make_badarg(env);                                      \
     } while (0)
+
+#else
+#define dbg(...) do {} while (0)
+#define CHECK_ARGC(what, n) do {} while (0)
 #endif
 
 static ERL_NIF_TERM
@@ -126,11 +132,6 @@ sqlite3_snapshot_r_dtor(ErlNifEnv* env, void* obj)
     sqlite3_snapshot_free(((sqlite3_snapshot_t*)obj)->snapshot);
 }
 
-#define CHECK_ARGC(what, n)                                                    \
-    do {                                                                       \
-        if ((what) != (n))                                                     \
-            return enif_make_badarg(env);                                      \
-    } while (0)
 
 #define GET_DB(env, term, rdb)                                                 \
     do {                                                                       \

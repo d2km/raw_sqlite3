@@ -28,8 +28,6 @@ SQLITE_CFLAGS = -DSQLITE_DOS=0 \
 		-I$(CURDIR)/sqlite3
 
 ERTS_INCLUDE_DIR ?= $(shell erl -noshell -s init stop -eval "io:format(\"~ts/erts-~ts/include/\", [code:root_dir(), erlang:system_info(version)]).")
-ERL_INTERFACE_INCLUDE_DIR ?= $(shell erl -noshell -s init stop -eval "io:format(\"~ts\", [code:lib_dir(erl_interface, include)]).")
-ERL_INTERFACE_LIB_DIR ?= $(shell erl -noshell -s init stop -eval "io:format(\"~ts\", [code:lib_dir(erl_interface, lib)]).")
 
 C_SRC_DIR = $(CURDIR)
 C_SRC_OUTPUT ?= $(CURDIR)/../priv/$(PROJECT).so
@@ -52,7 +50,7 @@ else ifeq ($(UNAME_SYS), Linux)
 endif
 
 
-CFLAGS += -fPIC -I$(CURDIR) -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR) $(SQLITE_CFLAGS)
+CFLAGS += -fPIC -I$(CURDIR) -I $(ERTS_INCLUDE_DIR) $(SQLITE_CFLAGS)
 
 ifeq ($(RAW_SQLITE3_DEBUG), 1)
 	CFLAGS += -O0 -DDEBUG -g
@@ -60,15 +58,13 @@ else
 	CFLAGS += -O2
 endif
 
-LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lei
-
 COMPILE_C = $(CC) $(CFLAGS) -c
 
 OBJECTS = sqlite3_nif.o sqlite3/sqlite3.o
 
 $(C_SRC_OUTPUT): $(OBJECTS)
 	@mkdir -p $(BASEDIR)/priv/
-	$(CC) $(OBJECTS) $(LDFLAGS) $(LDLIBS) -o $(C_SRC_OUTPUT)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $(C_SRC_OUTPUT)
 
 sqlite3_nif.o: sqlite3_nif.c sqlite3/sqlite3.h
 	$(COMPILE_C) $(OUTPUT_OPTION) $<

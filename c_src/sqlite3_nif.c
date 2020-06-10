@@ -1460,11 +1460,6 @@ static ErlNifFunc nif_funcs[] = {
       2,
       impl_sqlite3_backup_step,
       ERL_NIF_DIRTY_JOB_IO_BOUND },
-
-    { "sqlite3_backup_step",
-      2,
-      impl_sqlite3_backup_step,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
     { "sqlite3_backup_finish",
       1,
       impl_sqlite3_backup_finish,

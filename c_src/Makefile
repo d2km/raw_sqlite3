@@ -48,7 +48,7 @@ else ifeq ($(UNAME_SYS), FreeBSD)
 else ifeq ($(UNAME_SYS), Linux)
 	CC ?= gcc
 	CFLAGS ?= -std=c99 -finline-functions -Wall -Wmissing-prototypes
-	LDFLAGS ?= -pthread
+	LDFLAGS ?= -shared
 endif
 
 

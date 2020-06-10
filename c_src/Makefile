@@ -44,6 +44,7 @@ n	CC ?= cc
 else ifeq ($(UNAME_SYS), FreeBSD)
 	CC ?= cc
 	CFLAGS ?= -std=c99 -finline-functions -Wall -Wmissing-prototypes
+	LDFLAGS ?= -shared
 else ifeq ($(UNAME_SYS), Linux)
 	CC ?= gcc
 	CFLAGS ?= -std=c99 -finline-functions -Wall -Wmissing-prototypes

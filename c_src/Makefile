@@ -60,7 +60,7 @@ else
 	CFLAGS += -O2
 endif
 
-LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lerl_interface -lei
+LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lei
 
 COMPILE_C = $(CC) $(CFLAGS) -c
 

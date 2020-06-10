@@ -1,5 +1,5 @@
 {application, raw_sqlite3,
- [{description, "An OTP library"},
+ [{description, "A low-level NIF interface to sqlite3"},
   {vsn, "0.1.0"},
   {registered, []},
   {applications,
@@ -10,5 +10,5 @@
   {modules, []},
 
   {licenses, ["Apache 2.0"]},
-  {links, []}
+  {links, [{"Github", "https://github.com/d2km/raw_sqlite3"}]}
  ]}.

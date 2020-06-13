@@ -6,15 +6,19 @@
 #include <stdio.h>
 #define dbg(...) enif_fprintf(stderr, __VA_ARGS__)
 
-#define CHECK_ARGC(what, n)                                                    \
-    do {                                                                       \
-        if ((what) != (n))                                                     \
-            return enif_make_badarg(env);                                      \
+#define CHECK_ARGC(what, n)                                                                \
+    do {                                                                                   \
+        if ((what) != (n))                                                                 \
+            return enif_make_badarg(env);                                                  \
     } while (0)
 
 #else
-#define dbg(...) do {} while (0)
-#define CHECK_ARGC(what, n) do {} while (0)
+#define dbg(...)                                                                           \
+    do {                                                                                   \
+    } while (0)
+#define CHECK_ARGC(what, n)                                                                \
+    do {                                                                                   \
+    } while (0)
 #endif
 
 static ERL_NIF_TERM
@@ -132,44 +136,40 @@ sqlite3_snapshot_r_dtor(ErlNifEnv* env, void* obj)
     sqlite3_snapshot_free(((sqlite3_snapshot_t*)obj)->snapshot);
 }
 
-
-#define GET_DB(env, term, rdb)                                                 \
-    do {                                                                       \
-        if (!enif_get_resource((env), (term), sqlite3_r, (void**)(rdb)))       \
-            return enif_make_badarg(env);                                      \
+#define GET_DB(env, term, rdb)                                                             \
+    do {                                                                                   \
+        if (!enif_get_resource((env), (term), sqlite3_r, (void**)(rdb)))                   \
+            return enif_make_badarg(env);                                                  \
     } while (0)
 
-#define GET_STMT(env, term, rstmt)                                             \
-    do {                                                                       \
-        if (!enif_get_resource(                                                \
-              (env), (term), sqlite3_stmt_r, (void**)(rstmt)))                 \
-            return enif_make_badarg(env);                                      \
+#define GET_STMT(env, term, rstmt)                                                         \
+    do {                                                                                   \
+        if (!enif_get_resource((env), (term), sqlite3_stmt_r, (void**)(rstmt)))            \
+            return enif_make_badarg(env);                                                  \
     } while (0)
 
-#define GET_C_STR(env, term, pbin)                                             \
-    do {                                                                       \
-        if (!iodata_to_c_str((env), (term), (pbin)))                           \
-            return enif_make_badarg(env);                                      \
+#define GET_C_STR(env, term, pbin)                                                         \
+    do {                                                                                   \
+        if (!iodata_to_c_str((env), (term), (pbin)))                                       \
+            return enif_make_badarg(env);                                                  \
     } while (0)
 
-#define GET_INT(env, term, pn)                                                 \
-    do {                                                                       \
-        if (!enif_get_int((env), (term), (pn)))                                \
-            return enif_make_badarg(env);                                      \
+#define GET_INT(env, term, pn)                                                             \
+    do {                                                                                   \
+        if (!enif_get_int((env), (term), (pn)))                                            \
+            return enif_make_badarg(env);                                                  \
     } while (0)
 
-#define GET_BACKUP(env, term, pbackup)                                         \
-    do {                                                                       \
-        if (!enif_get_resource(                                                \
-              (env), (term), sqlite3_backup_r, (void**)(pbackup)))             \
-            return enif_make_badarg(env);                                      \
+#define GET_BACKUP(env, term, pbackup)                                                     \
+    do {                                                                                   \
+        if (!enif_get_resource((env), (term), sqlite3_backup_r, (void**)(pbackup)))        \
+            return enif_make_badarg(env);                                                  \
     } while (0)
 
-#define GET_BLOB(env, term, pblob)                                             \
-    do {                                                                       \
-        if (!enif_get_resource(                                                \
-              (env), (term), sqlite3_blob_r, (void**)(pblob)))                 \
-            return enif_make_badarg(env);                                      \
+#define GET_BLOB(env, term, pblob)                                                         \
+    do {                                                                                   \
+        if (!enif_get_resource((env), (term), sqlite3_blob_r, (void**)(pblob)))            \
+            return enif_make_badarg(env);                                                  \
     } while (0)
 
 static int
@@ -273,8 +273,7 @@ impl_sqlite3_load_extension(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     char* err_msg;
     char* proc_str = proc.size == 1 ? (char*)proc.data : NULL;
-    int rv =
-      sqlite3_load_extension(rdb->db, (char*)file.data, proc_str, &err_msg);
+    int rv = sqlite3_load_extension(rdb->db, (char*)file.data, proc_str, &err_msg);
 
     if (rv != SQLITE_OK) {
         ERL_NIF_TERM err = enif_make_string(env, err_msg, ERL_NIF_LATIN1);
@@ -297,9 +296,7 @@ impl_sqlite3_db_cacheflush(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_db_release_memory(ErlNifEnv* env,
-                               int argc,
-                               const ERL_NIF_TERM argv[])
+impl_sqlite3_db_release_memory(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 1);
 
@@ -340,9 +337,7 @@ impl_sqlite3_db_config(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_set_last_insert_rowid(ErlNifEnv* env,
-                                   int argc,
-                                   const ERL_NIF_TERM argv[])
+impl_sqlite3_set_last_insert_rowid(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     sqlite3_t* rdb = NULL;
     int new_rowid;
@@ -374,9 +369,7 @@ impl_sqlite3_busy_timeout(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_extended_result_codes(ErlNifEnv* env,
-                                   int argc,
-                                   const ERL_NIF_TERM argv[])
+impl_sqlite3_extended_result_codes(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     sqlite3_t* rdb = NULL;
     int rv, onoff;
@@ -416,9 +409,7 @@ impl_sqlite3_get_autocommit(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_last_insert_rowid(ErlNifEnv* env,
-                               int argc,
-                               const ERL_NIF_TERM argv[])
+impl_sqlite3_last_insert_rowid(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 1);
 
@@ -497,8 +488,7 @@ impl_sqlite3_db_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     if (rv != SQLITE_OK)
         return make_error_tuple(env, enif_make_int(env, rv));
 
-    return enif_make_tuple2(
-      env, enif_make_int(env, cur), enif_make_int(env, hw));
+    return enif_make_tuple2(env, enif_make_int(env, cur), enif_make_int(env, hw));
 }
 
 static ERL_NIF_TERM
@@ -516,14 +506,12 @@ impl_sqlite3_prepare_v2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     const char* leftover = NULL;
     sqlite3_stmt* stmt = NULL;
-    int rv =
-      sqlite3_prepare_v2(rdb->db, (char*)sql.data, sql.size, &stmt, &leftover);
+    int rv = sqlite3_prepare_v2(rdb->db, (char*)sql.data, sql.size, &stmt, &leftover);
 
     if (rv != SQLITE_OK)
         return make_error_tuple(env, enif_make_int(env, rv));
 
-    sqlite3_stmt_t* rstmt =
-      enif_alloc_resource(sqlite3_stmt_r, sizeof(sqlite3_stmt_t));
+    sqlite3_stmt_t* rstmt = enif_alloc_resource(sqlite3_stmt_r, sizeof(sqlite3_stmt_t));
     if (!rstmt) {
         sqlite3_finalize(stmt);
         return enif_raise_exception(env, make_atom(env, "alloc_resource"));
@@ -592,8 +580,7 @@ bind_cell(ErlNifEnv* env, sqlite3_stmt* stmt, ERL_NIF_TERM term, int idx)
             if (!iodata_to_binary(env, tuple[1], &bin))
                 return -1;
 
-            return sqlite3_bind_blob(
-              stmt, idx, bin.data, bin.size, SQLITE_TRANSIENT);
+            return sqlite3_bind_blob(stmt, idx, bin.data, bin.size, SQLITE_TRANSIENT);
         }
     }
 
@@ -625,8 +612,7 @@ impl_sqlite3_bind(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
         if (rv == -1) {
             ERL_NIF_TERM desc = make_atom(env, "wrong_parameter_type");
-            ERL_NIF_TERM err =
-              enif_make_tuple2(env, desc, enif_make_int(env, i + 1));
+            ERL_NIF_TERM err = enif_make_tuple2(env, desc, enif_make_int(env, i + 1));
             return make_error_tuple(env, err);
         }
 
@@ -868,8 +854,8 @@ impl_sqlite3_backup_init(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     ErlNifBinary src_name;
     GET_C_STR(env, argv[3], &src_name);
 
-    sqlite3_backup* backup = sqlite3_backup_init(
-      rdst->db, (char*)dst_name.data, rsrc->db, (char*)src_name.data);
+    sqlite3_backup* backup =
+      sqlite3_backup_init(rdst->db, (char*)dst_name.data, rsrc->db, (char*)src_name.data);
 
     sqlite3_backup_t* rbackup =
       enif_alloc_resource(sqlite3_backup_r, sizeof(sqlite3_backup_t));
@@ -912,9 +898,7 @@ impl_sqlite3_backup_finish(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_backup_remaining(ErlNifEnv* env,
-                              int argc,
-                              const ERL_NIF_TERM argv[])
+impl_sqlite3_backup_remaining(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 1);
 
@@ -956,8 +940,7 @@ impl_sqlite3_blob_open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     if (rv != SQLITE_OK)
         return make_error_tuple(env, enif_make_int(env, rv));
 
-    sqlite3_blob_t* rblob =
-      enif_alloc_resource(sqlite3_blob_r, sizeof(sqlite3_blob_t));
+    sqlite3_blob_t* rblob = enif_alloc_resource(sqlite3_blob_r, sizeof(sqlite3_blob_t));
 
     if (!rblob) {
         sqlite3_blob_close(blob);
@@ -1061,9 +1044,7 @@ impl_sqlite3_blob_reopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_backup_pagecount(ErlNifEnv* env,
-                              int argc,
-                              const ERL_NIF_TERM argv[])
+impl_sqlite3_backup_pagecount(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 1);
 
@@ -1085,9 +1066,7 @@ impl_sqlite3_errcode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_extended_errcode(ErlNifEnv* env,
-                              int argc,
-                              const ERL_NIF_TERM argv[])
+impl_sqlite3_extended_errcode(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 1);
 
@@ -1124,9 +1103,7 @@ impl_sqlite3_errstr(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_wal_autocheckpoint(ErlNifEnv* env,
-                                int argc,
-                                const ERL_NIF_TERM argv[])
+impl_sqlite3_wal_autocheckpoint(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 2);
 
@@ -1140,9 +1117,7 @@ impl_sqlite3_wal_autocheckpoint(ErlNifEnv* env,
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_wal_checkpoint_v2(ErlNifEnv* env,
-                               int argc,
-                               const ERL_NIF_TERM argv[])
+impl_sqlite3_wal_checkpoint_v2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 3);
 
@@ -1162,16 +1137,14 @@ impl_sqlite3_wal_checkpoint_v2(ErlNifEnv* env,
     if (rv != SQLITE_OK)
         return make_error_tuple(env, enif_make_int(env, rv));
 
-    ERL_NIF_TERM t = enif_make_tuple2(
-      env, enif_make_int(env, log_size), enif_make_int(env, total_frames));
+    ERL_NIF_TERM t =
+      enif_make_tuple2(env, enif_make_int(env, log_size), enif_make_int(env, total_frames));
 
     return make_ok_tuple(env, t);
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_compileoption_get(ErlNifEnv* env,
-                               int argc,
-                               const ERL_NIF_TERM argv[])
+impl_sqlite3_compileoption_get(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 1);
 
@@ -1186,9 +1159,7 @@ impl_sqlite3_compileoption_get(ErlNifEnv* env,
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_compileoption_used(ErlNifEnv* env,
-                                int argc,
-                                const ERL_NIF_TERM argv[])
+impl_sqlite3_compileoption_used(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 1);
 
@@ -1219,9 +1190,7 @@ impl_sqlite3_sourceid(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_libversion_number(ErlNifEnv* env,
-                               int argc,
-                               const ERL_NIF_TERM argv[])
+impl_sqlite3_libversion_number(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 0);
 
@@ -1282,12 +1251,10 @@ impl_sqlite3_snapshot_open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     GET_C_STR(env, argv[1], &db_name);
 
     sqlite3_snapshot_t* rsnapshot = NULL;
-    if (!enif_get_resource(
-          env, argv[2], sqlite3_snapshot_r, (void**)&rsnapshot))
+    if (!enif_get_resource(env, argv[2], sqlite3_snapshot_r, (void**)&rsnapshot))
         return enif_make_badarg(env);
 
-    int rv =
-      sqlite3_snapshot_open(rdb->db, (char*)db_name.data, rsnapshot->snapshot);
+    int rv = sqlite3_snapshot_open(rdb->db, (char*)db_name.data, rsnapshot->snapshot);
 
     return enif_make_int(env, rv);
 }
@@ -1298,13 +1265,11 @@ impl_sqlite3_snapshot_cmp(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     CHECK_ARGC(argc, 2);
 
     sqlite3_snapshot_t* rsnapshot1 = NULL;
-    if (!enif_get_resource(
-          env, argv[0], sqlite3_snapshot_r, (void**)&rsnapshot1))
+    if (!enif_get_resource(env, argv[0], sqlite3_snapshot_r, (void**)&rsnapshot1))
         return enif_make_badarg(env);
 
     sqlite3_snapshot_t* rsnapshot2 = NULL;
-    if (!enif_get_resource(
-          env, argv[1], sqlite3_snapshot_r, (void**)&rsnapshot2))
+    if (!enif_get_resource(env, argv[1], sqlite3_snapshot_r, (void**)&rsnapshot2))
         return enif_make_badarg(env);
 
     int rv = sqlite3_snapshot_cmp(rsnapshot1->snapshot, rsnapshot2->snapshot);
@@ -1318,8 +1283,7 @@ impl_sqlite3_snapshot_free(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     CHECK_ARGC(argc, 1);
 
     sqlite3_snapshot_t* rsnapshot = NULL;
-    if (!enif_get_resource(
-          env, argv[0], sqlite3_snapshot_r, (void**)&rsnapshot))
+    if (!enif_get_resource(env, argv[0], sqlite3_snapshot_r, (void**)&rsnapshot))
         return enif_make_badarg(env);
 
     sqlite3_snapshot_free(rsnapshot->snapshot);
@@ -1329,9 +1293,7 @@ impl_sqlite3_snapshot_free(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
-impl_sqlite3_snapshot_recover(ErlNifEnv* env,
-                              int argc,
-                              const ERL_NIF_TERM argv[])
+impl_sqlite3_snapshot_recover(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 2);
 
@@ -1358,8 +1320,7 @@ impl_sqlite3_serialize(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     GET_C_STR(env, argv[1], &db_name);
 
     sqlite3_int64 size = 0;
-    unsigned char* s =
-      sqlite3_serialize(rdb->db, (char*)db_name.data, &size, 0);
+    unsigned char* s = sqlite3_serialize(rdb->db, (char*)db_name.data, &size, 0);
 
     if (!s)
         return make_error_tuple(env, make_atom(env, "alloc_memory"));
@@ -1394,37 +1355,19 @@ impl_sqlite3_deserialize(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     return enif_make_int(env, rv);
 }
 
+#define DIRTY_IO ERL_NIF_DIRTY_JOB_IO_BOUND
 static ErlNifFunc nif_funcs[] = {
-    { "sqlite3_open_v2", 3, impl_sqlite3_open_v2, ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_close_v2",
-      1,
-      impl_sqlite3_close_v2,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_open_v2", 3, impl_sqlite3_open_v2, DIRTY_IO },
+    { "sqlite3_close_v2", 1, impl_sqlite3_close_v2, DIRTY_IO },
     { "sqlite3_limit", 3, impl_sqlite3_limit, 0 },
-    { "sqlite3_load_extension",
-      3,
-      impl_sqlite3_load_extension,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-
-    { "sqlite3_db_cacheflush",
-      1,
-      impl_sqlite3_db_cacheflush,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_load_extension", 3, impl_sqlite3_load_extension, DIRTY_IO },
+    { "sqlite3_db_cacheflush", 1, impl_sqlite3_db_cacheflush, DIRTY_IO },
     { "sqlite3_db_release_memory", 1, impl_sqlite3_db_release_memory, 0 },
     { "sqlite3_db_config", 3, impl_sqlite3_db_config, 0 },
-    { "sqlite3_set_last_insert_rowid",
-      2,
-      impl_sqlite3_set_last_insert_rowid,
-      0 },
+    { "sqlite3_set_last_insert_rowid", 2, impl_sqlite3_set_last_insert_rowid, 0 },
     { "sqlite3_busy_timeout", 2, impl_sqlite3_busy_timeout, 0 },
-    { "sqlite3_extended_result_codes",
-      2,
-      impl_sqlite3_extended_result_codes,
-      0 },
-    { "sqlite3_interrupt",
-      1,
-      impl_sqlite3_interrupt,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_extended_result_codes", 2, impl_sqlite3_extended_result_codes, 0 },
+    { "sqlite3_interrupt", 1, impl_sqlite3_interrupt, DIRTY_IO },
     { "sqlite3_get_autocommit", 1, impl_sqlite3_get_autocommit, 0 },
     { "sqlite3_last_insert_rowid", 1, impl_sqlite3_last_insert_rowid, 0 },
     { "sqlite3_changes", 1, impl_sqlite3_changes, 0 },
@@ -1432,19 +1375,13 @@ static ErlNifFunc nif_funcs[] = {
     { "sqlite3_db_filename", 2, impl_sqlite3_db_filename, 0 },
     { "sqlite3_db_readonly", 2, impl_sqlite3_db_readonly, 0 },
     { "sqlite3_db_status", 3, impl_sqlite3_db_status, 0 },
-    { "sqlite3_prepare_v2",
-      2,
-      impl_sqlite3_prepare_v2,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_prepare_v2", 2, impl_sqlite3_prepare_v2, DIRTY_IO },
     { "sqlite3_bind", 2, impl_sqlite3_bind, 0 },
-    { "sqlite3_step", 1, impl_sqlite3_step, ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_step", 1, impl_sqlite3_step, DIRTY_IO },
     { "sqlite3_reset", 1, impl_sqlite3_reset, 0 },
     { "sqlite3_clear_bindings", 1, impl_sqlite3_clear_bindings, 0 },
     { "sqlite3_finalize", 1, impl_sqlite3_finalize, 0 },
-    { "sqlite3_data_count",
-      1,
-      impl_sqlite3_data_count,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_data_count", 1, impl_sqlite3_data_count, DIRTY_IO },
     { "sqlite3_sql", 1, impl_sqlite3_sql, 0 },
     { "sqlite3_expanded_sql", 1, impl_sqlite3_expanded_sql, 0 },
     { "sqlite3_normalized_sql", 1, impl_sqlite3_normalized_sql, 0 },
@@ -1452,87 +1389,36 @@ static ErlNifFunc nif_funcs[] = {
     { "sqlite3_stmt_isexplain", 1, impl_sqlite3_stmt_isexplain, 0 },
     { "sqlite3_stmt_readonly", 1, impl_sqlite3_stmt_readonly, 0 },
     { "sqlite3_stmt_status", 3, impl_sqlite3_stmt_status, 0 },
-    { "sqlite3_backup_init",
-      4,
-      impl_sqlite3_backup_init,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_backup_step",
-      2,
-      impl_sqlite3_backup_step,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_backup_finish",
-      1,
-      impl_sqlite3_backup_finish,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_backup_init", 4, impl_sqlite3_backup_init, DIRTY_IO },
+    { "sqlite3_backup_step", 2, impl_sqlite3_backup_step, DIRTY_IO },
+    { "sqlite3_backup_finish", 1, impl_sqlite3_backup_finish, DIRTY_IO },
     { "sqlite3_backup_pagecount", 1, impl_sqlite3_backup_pagecount, 0 },
     { "sqlite3_backup_remaining", 1, impl_sqlite3_backup_remaining, 0 },
-    { "sqlite3_blob_open",
-      6,
-      impl_sqlite3_blob_open,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_blob_close",
-      1,
-      impl_sqlite3_blob_close,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_blob_read",
-      3,
-      impl_sqlite3_blob_read,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_blob_write",
-      3,
-      impl_sqlite3_blob_write,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_blob_bytes",
-      1,
-      impl_sqlite3_blob_bytes,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_blob_reopen",
-      2,
-      impl_sqlite3_blob_reopen,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_blob_open", 6, impl_sqlite3_blob_open, DIRTY_IO },
+    { "sqlite3_blob_close", 1, impl_sqlite3_blob_close, DIRTY_IO },
+    { "sqlite3_blob_read", 3, impl_sqlite3_blob_read, DIRTY_IO },
+    { "sqlite3_blob_write", 3, impl_sqlite3_blob_write, DIRTY_IO },
+    { "sqlite3_blob_bytes", 1, impl_sqlite3_blob_bytes, DIRTY_IO },
+    { "sqlite3_blob_reopen", 2, impl_sqlite3_blob_reopen, DIRTY_IO },
     { "sqlite3_errcode", 1, impl_sqlite3_errcode, 0 },
     { "sqlite3_extended_errcode", 1, impl_sqlite3_extended_errcode, 0 },
     { "sqlite3_errmsg", 1, impl_sqlite3_errmsg, 0 },
     { "sqlite3_errstr", 1, impl_sqlite3_errstr, 0 },
     { "sqlite3_wal_autocheckpoint", 2, impl_sqlite3_wal_autocheckpoint, 0 },
-    { "sqlite3_wal_checkpoint_v2",
-      3,
-      impl_sqlite3_wal_checkpoint_v2,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
+    { "sqlite3_wal_checkpoint_v2", 3, impl_sqlite3_wal_checkpoint_v2, DIRTY_IO },
     { "sqlite3_compileoption_get", 1, impl_sqlite3_compileoption_get, 0 },
     { "sqlite3_compileoption_used", 1, impl_sqlite3_compileoption_used, 0 },
     { "sqlite3_libversion", 0, impl_sqlite3_libversion, 0 },
     { "sqlite3_sourceid", 0, impl_sqlite3_sourceid, 0 },
     { "sqlite3_libversion_number", 0, impl_sqlite3_libversion_number, 0 },
     { "sqlite3_complete", 1, impl_sqlite3_complete, 0 },
-    { "sqlite3_snapshot_get",
-      2,
-      impl_sqlite3_snapshot_get,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_snapshot_open",
-      3,
-      impl_sqlite3_snapshot_open,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_snapshot_cmp",
-      2,
-      impl_sqlite3_snapshot_cmp,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_snapshot_recover",
-      2,
-      impl_sqlite3_snapshot_recover,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_snapshot_free",
-      1,
-      impl_sqlite3_snapshot_free,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_serialize",
-      2,
-      impl_sqlite3_serialize,
-      ERL_NIF_DIRTY_JOB_IO_BOUND },
-    { "sqlite3_deserialize",
-      3,
-      impl_sqlite3_deserialize,
-      ERL_NIF_DIRTY_JOB_IO_BOUND }
+    { "sqlite3_snapshot_get", 2, impl_sqlite3_snapshot_get, DIRTY_IO },
+    { "sqlite3_snapshot_open", 3, impl_sqlite3_snapshot_open, DIRTY_IO },
+    { "sqlite3_snapshot_cmp", 2, impl_sqlite3_snapshot_cmp, DIRTY_IO },
+    { "sqlite3_snapshot_recover", 2, impl_sqlite3_snapshot_recover, DIRTY_IO },
+    { "sqlite3_snapshot_free", 1, impl_sqlite3_snapshot_free, DIRTY_IO },
+    { "sqlite3_serialize", 2, impl_sqlite3_serialize, DIRTY_IO },
+    { "sqlite3_deserialize", 3, impl_sqlite3_deserialize, DIRTY_IO }
 };
 
 static int
@@ -1543,8 +1429,8 @@ load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
     /* assert(strcmp(sqlite3_libversion(), SQLITE_VERSION) == 0); */
 
     int flags = ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER;
-    sqlite3_r = enif_open_resource_type(
-      env, NULL, "sqlite3_r", sqlite3_r_dtor, flags, NULL);
+    sqlite3_r =
+      enif_open_resource_type(env, NULL, "sqlite3_r", sqlite3_r_dtor, flags, NULL);
 
     sqlite3_stmt_r = enif_open_resource_type(
       env, NULL, "sqlite3_stmt_r", sqlite3_stmt_r_dtor, flags, NULL);
@@ -1562,10 +1448,7 @@ load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 }
 
 static int
-upgrade(ErlNifEnv* env,
-        void** priv_data,
-        void** old_priv_data,
-        ERL_NIF_TERM load_info)
+upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info)
 {
     return sqlite3_initialize();
 }

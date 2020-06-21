@@ -1,6 +1,7 @@
 #include "sqlite3/sqlite3.h"
 #include <erl_nif.h>
 #include <string.h>
+#include <assert.h>
 
 #ifdef DEBUG
 #include <stdio.h>
@@ -1413,9 +1414,9 @@ static ErlNifFunc nif_funcs[] = {
 static int
 load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 {
-    /* assert(sqlite3_libversion_number() == SQLITE_VERSION_NUMBER); */
-    /* assert(strncmp(sqlite3_sourceid(), SQLITE_SOURCE_ID, 80) == 0); */
-    /* assert(strcmp(sqlite3_libversion(), SQLITE_VERSION) == 0); */
+    assert(sqlite3_libversion_number() == SQLITE_VERSION_NUMBER);
+    assert(strncmp(sqlite3_sourceid(), SQLITE_SOURCE_ID, 80) == 0);
+    assert(strcmp(sqlite3_libversion(), SQLITE_VERSION) == 0);
 
     int flags = ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER;
     sqlite3_r =

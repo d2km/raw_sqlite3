@@ -103,7 +103,6 @@ typedef struct sqlite_snapshot_t
 static void
 sqlite3_r_dtor(ErlNifEnv* env, void* obj)
 {
-    dbg("sqlite_close_v2(%p)\n", ((sqlite3_t*)obj)->db);
     sqlite3_close_v2(((sqlite3_t*)obj)->db);
     sqlite3_free(((sqlite3_t*)obj)->db_name);
 }
@@ -111,28 +110,24 @@ sqlite3_r_dtor(ErlNifEnv* env, void* obj)
 static void
 sqlite3_stmt_r_dtor(ErlNifEnv* env, void* obj)
 {
-    dbg("sqlite_finalize(%p)\n", ((sqlite3_stmt_t*)obj)->stmt);
     sqlite3_finalize(((sqlite3_stmt_t*)obj)->stmt);
 }
 
 static void
 sqlite3_blob_r_dtor(ErlNifEnv* env, void* obj)
 {
-    dbg("sqlite_blob_close(%p)\n", ((sqlite3_blob_t*)obj)->blob);
     sqlite3_blob_close(((sqlite3_blob_t*)obj)->blob);
 }
 
 static void
 sqlite3_backup_r_dtor(ErlNifEnv* env, void* obj)
 {
-    dbg("sqlite_backup_finish(%p)\n", ((sqlite3_backup_t*)obj)->backup);
     sqlite3_backup_finish(((sqlite3_backup_t*)obj)->backup);
 }
 
 static void
 sqlite3_snapshot_r_dtor(ErlNifEnv* env, void* obj)
 {
-    dbg("sqlite_snapshot_free(%p)\n", ((sqlite3_snapshot_t*)obj)->snapshot);
     sqlite3_snapshot_free(((sqlite3_snapshot_t*)obj)->snapshot);
 }
 
@@ -199,8 +194,6 @@ impl_sqlite3_open_v2(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     ErlNifBinary vfs;
     GET_C_STR(env, argv[2], &vfs);
-
-    dbg("sqlite3_open_v2('%s', %d, '%s')\n", path.data, flags, vfs.data);
 
     char* vfs_str = strlen((char*)vfs.data) == 0 ? NULL : (char*)vfs.data;
     sqlite3* db = NULL;

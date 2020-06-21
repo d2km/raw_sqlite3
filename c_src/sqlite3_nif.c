@@ -650,16 +650,12 @@ make_cell(ErlNifEnv* env, sqlite3_stmt* stmt, int col)
 static ERL_NIF_TERM
 make_row(ErlNifEnv* env, sqlite3_stmt* stmt, size_t sz)
 {
-    ERL_NIF_TERM* terms = enif_alloc(sz * sizeof(ERL_NIF_TERM));
-
-    if (!terms)
-        return make_error_tuple(env, make_atom(env, "emem"));
+    ERL_NIF_TERM terms[sz];
 
     for (int i = 0; i < sz; i++)
         terms[i] = make_cell(env, stmt, i);
 
     ERL_NIF_TERM ret = enif_make_tuple_from_array(env, terms, sz);
-    enif_free(terms);
 
     return ret;
 }

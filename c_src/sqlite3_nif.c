@@ -599,6 +599,7 @@ impl_sqlite3_bind(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         int rv = bind_cell(env, rstmt->stmt, head, i + 1);
 
         if (rv == -1) {
+            sqlite3_clear_bindings(rstmt->stmt);
             ERL_NIF_TERM desc = make_atom(env, "wrong_parameter_type");
             ERL_NIF_TERM err = enif_make_tuple2(env, desc, enif_make_int(env, i + 1));
             return make_error_tuple(env, err);

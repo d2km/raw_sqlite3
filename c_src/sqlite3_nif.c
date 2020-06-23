@@ -537,13 +537,14 @@ bind_cell(ErlNifEnv* env, sqlite3_stmt* stmt, ERL_NIF_TERM term, int idx)
         if (!enif_get_atom(env, term, atom, sizeof atom, ERL_NIF_LATIN1))
             return -1;
 
-        if (strcmp("nil", atom) == 0 || strcmp("undefined", atom) == 0)
+        if (strncmp("nil", atom, sizeof atom) == 0 ||
+            strncmp("undefined", atom, sizeof atom) == 0)
             return sqlite3_bind_null(stmt, idx);
 
-        if (strcmp("true", atom) == 0)
+        if (strncmp("true", atom, sizeof atom) == 0)
             return sqlite3_bind_int(stmt, idx, 1);
 
-        if (strcmp("false", atom) == 0)
+        if (strncmp("false", atom, sizeof atom) == 0)
             return sqlite3_bind_int(stmt, idx, 0);
 
     } else if (enif_is_tuple(env, term)) {
@@ -558,13 +559,13 @@ bind_cell(ErlNifEnv* env, sqlite3_stmt* stmt, ERL_NIF_TERM term, int idx)
             return -1;
 
         ErlNifBinary bin = { 0 };
-        if (strcmp("text", atom) == 0) {
+        if (strncmp("text", atom, sizeof atom) == 0) {
             if (!iodata_to_binary(env, tuple[1], &bin))
                 return -1;
 
             return sqlite3_bind_text(
               stmt, idx, (char*)bin.data, bin.size, SQLITE_TRANSIENT);
-        } else if (strcmp("blob", atom) == 0) {
+        } else if (strncmp("blob", atom, sizeof atom) == 0) {
             if (!iodata_to_binary(env, tuple[1], &bin))
                 return -1;
 

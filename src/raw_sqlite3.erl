@@ -17,6 +17,7 @@
          fetchall/1,
          q/2, q/3,
          exec/2, exec/3,
+         insert_many/3,
          fold/4, fold/5,
          map/3, map/4,
          with_trxn/2,
@@ -97,6 +98,30 @@ exec(Db, Sql, Params) ->
         {error, _} = Err ->
             expand_error(Db, Err)
     end.
+
+insert_many(Db, Sql, ParameterList) ->
+    case sqlite3_nif:sqlite3_prepare_v2(Db, Sql) of
+        {ok, Stmt, _Leftover} ->
+            expand_error(Db, insert_many(Stmt, ParameterList));
+        {error, _} = Err ->
+            expand_error(Db, Err)
+    end.
+
+insert_many(_Stmt, []) ->
+    ok;
+insert_many(Stmt, [Params | Rest]) ->
+   case sqlite3_nif:sqlite3_bind(Stmt, Params) of
+       ok ->
+           case sqlite3_nif:sqlite3_step(Stmt) of
+               ok ->
+                   ?SQLITE_OK = sqlite3_nif:sqlite3_reset(Stmt),
+                   insert_many(Stmt, Rest);
+               Err ->
+                   Err
+           end;
+       Err ->
+           Err
+   end.
 
 exec_one(Stmt, Params) ->
     case sqlite3_nif:sqlite3_bind(Stmt, Params) of

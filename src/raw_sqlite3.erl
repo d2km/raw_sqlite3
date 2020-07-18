@@ -86,6 +86,12 @@ exec(_Db, <<>>, _Params) ->
     ok;
 exec(Db, <<$ , Rest/binary>>, Params) ->
     exec(Db, Rest, Params);
+exec(Db, <<$\n, Rest/binary>>, Params) ->
+    exec(Db, Rest, Params);
+exec(Db, <<$\r, Rest/binary>>, Params) ->
+    exec(Db, Rest, Params);
+exec(Db, <<$\t, Rest/binary>>, Params) ->
+    exec(Db, Rest, Params);
 exec(Db, Sql, Params) ->
     case sqlite3_nif:sqlite3_prepare_v2(Db, Sql) of
         {ok, Stmt, Leftover} ->

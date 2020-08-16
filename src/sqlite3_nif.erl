@@ -119,7 +119,6 @@
                    | ?SQLITE_OPEN_CREATE
                    | ?SQLITE_OPEN_URI
                    | ?SQLITE_OPEN_MEMORY
-                   | ?SQLITE_OPEN_NOMUTEX
                    | ?SQLITE_OPEN_FULLMUTEX
                    | ?SQLITE_OPEN_SHAREDCACHE
                    | ?SQLITE_OPEN_PRIVATECACHE

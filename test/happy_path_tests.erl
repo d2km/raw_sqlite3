@@ -613,13 +613,13 @@ compileoption_test() ->
               end,
     [?assertEqual(1, sqlite3_compileoption_used(Opt)) || Opt <- OptList(0)].
 
--define(VSN, <<"3.32.0">>).
--define(VSN_NUM, 3032000).
+-define(VSN, <<"3.33.0">>).
+-define(VSN_NUM, 3033000).
 libversion_test() ->
     ?assertEqual(?VSN, sqlite3_libversion()),
     ?assertEqual(?VSN_NUM, sqlite3_libversion_number()).
 
--define(SOURCE_ID, <<"2020-05-22 17:46:16 5998789c9c744bce92e4cff7636bba800a75574243d6977e1fc8281e360f8d5a">>).
+-define(SOURCE_ID, <<"2020-08-14 13:23:32 fca8dc8b578f215a969cd899336378966156154710873e68b3d9ac5881b0ff3f">>).
 sourceid_test() ->
     ?assertEqual(?SOURCE_ID, sqlite3_sourceid()).
 

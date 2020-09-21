@@ -20,3 +20,14 @@ insert_many_test() ->
     ?assertEqual(ok, raw_sqlite3:exec(Db, Sql1)),
     ?assertEqual(ok, raw_sqlite3:insert_many(Db, Sql2, Values)),
     ?assertEqual([{2}], raw_sqlite3:q(Db, "SELECT count(*) FROM t")).
+
+%% prepare should ignore leftover statements
+prepare_statement_test() ->
+    Sqls = [erlang:list_to_binary(["SELECT * FROM t;" || _ <- lists:seq(1, N)])
+            || N <- lists:seq(1, 100)],
+    Sql1 = "SELECT y FROM t",
+    {ok, Db} = raw_sqlite3:open(":memory:"),
+    ok = raw_sqlite3:exec(Db, "CREATE TABLE t(x INTEGER)"),
+    lists:map(fun(Sql) -> ?assertMatch({ok, _}, raw_sqlite3:prepare(Db, Sql)) end, Sqls),
+    ?assertMatch({error, _}, raw_sqlite3:prepare(Db, Sql1)).
+   

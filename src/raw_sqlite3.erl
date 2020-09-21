@@ -212,8 +212,16 @@ close(Db) ->
                    Stmt    :: sqlite3_stmt(),
                    ErrDesc :: utf8str().
 %% @doc Prepare a statement to use with bind/2, step/1, fetchall/1, fetchall2.
+%% NOTE: Only the first statement contained in the query <code>Sql</code> will be prepared.
+%% Use <code>sqlite3_nif:sqlite3_prepare_v2/2</code> if you want to have the remaining
+%% statements returned.
 prepare(Db, Sql) ->
-    expand_error(Db, sqlite3_nif:sqlite3_prepare_v2(Db, Sql)).
+    case sqlite3_nif:sqlite3_prepare_v2(Db, Sql) of
+        {ok, Stmt, _Leftover} ->
+            {ok, Stmt};
+        {error, _} = Err ->
+            expand_error(Db, Err)
+    end.
 
 -type query_parameter()  :: number()
                           | true

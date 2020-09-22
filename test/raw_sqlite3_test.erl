@@ -31,11 +31,20 @@ prepare_statement_test() ->
     lists:map(fun(Sql) -> ?assertMatch({ok, _}, raw_sqlite3:prepare(Db, Sql)) end, Sqls),
     ?assertMatch({error, _}, raw_sqlite3:prepare(Db, Sql1)).
 
-%% reset should return ok on success
-reset_test() ->
+%% reset should return ok on success and {error, Err} on error
+reset_ret_test() ->
     Sql1 = "CREATE TABLE t(id INTEGER PRIMARY KEY, txt TEXT)",
     Sql2 = "SELECT * FROM t",
+    Sql3 = "DROP TABLE t",
     {ok, Db} = raw_sqlite3:open(":memory:"),
     ok = raw_sqlite3:exec(Db, Sql1),
     {ok, Stmt} = raw_sqlite3:prepare(Db, Sql2),
-    ?assertEqual(ok, raw_sqlite3:reset(Stmt)).
+    ?assertEqual(ok, raw_sqlite3:reset(Stmt)),
+    ok = raw_sqlite3:exec(Db, Sql3),
+    {error, _} = raw_sqlite3:step(Stmt),
+    ?assertMatch({error, _}, raw_sqlite3:reset(Stmt)).
+
+%% close should return ok on success
+close_ret_test() ->
+    {ok, Db} = raw_sqlite3:open(":memory:"),
+    ?assertEqual(ok, raw_sqlite3:close(Db)).

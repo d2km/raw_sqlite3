@@ -192,13 +192,20 @@ open(DbFile, Flags, Vfs) ->
 
 -spec close(Db) -> Result
               when Db     :: sqlite3(),
-                   Result :: sqlite3_error_code().
+                   Result :: ok | {error, sqlite3_error_code()}.
 %% @doc Close database connection.
 %% NOTE: Usually, it is not necessary to call the function because a garbage
 %% collection will destroy the connection object. However, it may be useful to
 %% have the explicit control over a connection handle in some situations.
 close(Db) ->
-    expand_error(sqlite3_nif:sqlite3_close_v2(Db)).
+    case sqlite3_nif:sqlite3_close_v2(Db) of
+        ?SQLITE_OK -> 
+            ok;
+        Err ->
+            {error, expand_error(Err)}
+    end.
+
+
 
 %% @type sqlite3_stmt(). A prepared SQL statement.
 -opaque sqlite3_stmt() :: sqlite3_nif:sqlite3_stmt().
@@ -252,12 +259,12 @@ bind(Stmt, Params) ->
 step(Stmt) ->
     expand_error(sqlite3_nif:sqlite3_step(Stmt)).
 
--spec reset(Stmt::sqlite3_stmt()) -> sqlite3_error_code().
+-spec reset(Stmt::sqlite3_stmt()) -> ok | {error, sqlite3_error_code()}.
 %% @doc Reset a prepared statement.
 reset(Stmt) ->
     case sqlite3_nif:sqlite3_reset(Stmt) of
         ?SQLITE_OK -> ok;
-        Err -> expand_error(Err)
+        Err -> {error, expand_error(Err)}
     end.
 
 -spec fetchall(Stmt) -> Result

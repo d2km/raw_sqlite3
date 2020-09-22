@@ -247,15 +247,18 @@ bind(Stmt, Params) ->
                    Row     :: tuple().
 %% @doc Evaluate a prepared statement and fetch one result. A statement should
 %% be run till <code>ok</code> is returned.
-%% NOTE: a fully evaluated statement must be reset for re-use in another
-%% operation.
+%% NOTE: a fully evaluated statement is automatically reset if `sqlite3_step` is called
+%% using the statement after it returns `<code>ok</code>`.
 step(Stmt) ->
     expand_error(sqlite3_nif:sqlite3_step(Stmt)).
 
 -spec reset(Stmt::sqlite3_stmt()) -> sqlite3_error_code().
 %% @doc Reset a prepared statement.
 reset(Stmt) ->
-    expand_error(sqlite3_nif:sqlite3_reset(Stmt)).
+    case sqlite3_nif:sqlite3_reset(Stmt) of
+        ?SQLITE_OK -> ok;
+        Err -> expand_error(Err)
+    end.
 
 -spec fetchall(Stmt) -> Result
               when Stmt    :: sqlite3_stmt(),

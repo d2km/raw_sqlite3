@@ -242,8 +242,10 @@ prepare(Db, Sql) ->
 -spec bind(Stmt, Params) -> Result
               when Stmt    :: sqlite3_stmt(),
                    Params  :: [query_parameter()],
-                   Result  :: ok | {error, {sqlite3_error_code(), ErrDesc}},
-                   ErrDesc :: utf8str().
+                   Result  :: ok | {error, Reason},
+                   Reason :: sqlite3_error_code() |
+                             {wrong_parameter_type, pos_integer()} |
+                             wrong_parameter_count.
 bind(Stmt, Params) ->
     expand_error(sqlite3_nif:sqlite3_bind(Stmt, Params)).
 

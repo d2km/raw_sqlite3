@@ -48,3 +48,36 @@ reset_ret_test() ->
 close_ret_test() ->
     {ok, Db} = raw_sqlite3:open(":memory:"),
     ?assertEqual(ok, raw_sqlite3:close(Db)).
+
+bind_test() ->
+    Sql1 = "CREATE TABLE t(id INTEGER)",
+    Sql2 = "INSERT INTO t(id) VALUES (?)",
+    {ok, Db} = raw_sqlite3:open(":memory:"),
+    ok = raw_sqlite3:exec(Db, Sql1),
+    {ok, Stmt1} = raw_sqlite3:prepare(Db, Sql2),
+
+    % bind should return `ok` on success
+    ?assertEqual(ok, raw_sqlite3:bind(Stmt1, [{text, "hello"}])),
+
+    % bind should return `wrong_parameter_count` error with too many parameters
+    ?assertEqual({error, wrong_parameter_count},
+                 raw_sqlite3:bind(Stmt1, [{text, "hello"}, {text, "world"}])),
+
+    % bind should return `wrong_parameter_count` error with too few parameters
+    ?assertEqual({error, wrong_parameter_count},
+                 raw_sqlite3:bind(Stmt1, [])),
+
+    % Generate insert queries with multiple parameters, one of which is incorrect.
+    Count = 10,
+    lists:foreach(fun(N) ->
+                    Q = ["INSERT INTO t(id) VALUES " | lists:join(",", ["(?)" ||
+                        _ <- lists:seq(1, Count)])],
+                    P = [{text, "hello"} || M <- lists:seq(1, N - 1)] ++
+                        [{text, 1}] ++
+                        [{text, "hello"} || M <- lists:seq(1, Count - N)],
+                    {ok, S} = raw_sqlite3:prepare(Db, Q),
+
+                    % bind should return `{wrong_parameter_type, N}` error when the Nth
+                    % parameter is malformed.
+                    ?assertEqual({error, {wrong_parameter_type, N}}, raw_sqlite3:bind(S, P))
+                  end, lists:seq(1, Count)).

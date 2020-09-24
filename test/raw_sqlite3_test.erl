@@ -72,9 +72,9 @@ bind_test() ->
     lists:foreach(fun(N) ->
                     Q = ["INSERT INTO t(id) VALUES " | lists:join(",", ["(?)" ||
                         _ <- lists:seq(1, Count)])],
-                    P = [{text, "hello"} || M <- lists:seq(1, N - 1)] ++
+                    P = [{text, "hello"} || _ <- lists:seq(1, N - 1)] ++
                         [{text, 1}] ++
-                        [{text, "hello"} || M <- lists:seq(1, Count - N)],
+                        [{text, "hello"} || _ <- lists:seq(1, Count - N)],
                     {ok, S} = raw_sqlite3:prepare(Db, Q),
 
                     % bind should return `{wrong_parameter_type, N}` error when the Nth

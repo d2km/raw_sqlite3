@@ -27,8 +27,8 @@ except:
  * `sqlite3_bind_*` functions which are replaced by single `sqlite3_bind/2`;
  * `sqlite3_column_*` functions which are merged into `sqlite3_step/1`;
  * `sqlite3_mutex_*` functions which make no sense in Erlang code;
- * API related to creating of user functions;
- * Unicode variants of the C API (only UTF-8 version are allowed);
+ * API related to user functions creation;
+ * Unicode variants of the C API (only UTF-8 versions are allowed);
  * Memory managing functions;
  * `_vfs_*` functions;
  * ...

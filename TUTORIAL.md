@@ -37,7 +37,7 @@ raw_sqlite3:close(Db)
 ```
 
 The `close/1` function is idempotent, however using a closed connection will
-throw `badarg` exception.
+throw the `badarg` exception.
 
 ## Running DQL/DML/DDL queries
 
@@ -56,7 +56,8 @@ ok = raw_sqlite3:exec(Db, "CREATE TABLE t(c TEXT); INSERT INTO t VALUES ('hello'
 Note: `exec/3` tries to bind parameters to every expression, so it mostly makes
 sense when used with a single DML expression.
 
-There is a specialised function to insert many parameters at once
+There is a specialised function to insert many values at once (probably should
+be called within `with_trxn/2` context)
 
 ```erlang
 Values = [[1, 'hello'], [2, 'world'], [3, 'universe']],
@@ -70,15 +71,15 @@ with the `fold/4-5` function
 
 ```erlang
 %% Sum all expenses from the table where amount > 42.
-%% This can be done in SQL itself, of course, but sometimes
+%% This can be done in SQL itself, of course, but maybe be handy for side effects
 Total = raw_sqlite3:fold(Db, "SELECT amount FROM expenses WHERE amount > ?",
                          _QueryParameters = [42],
                          fun(Elem, Acc) -> Elem + Acc end,
                          _Acc = 0)
 ```
 
-There is also the `map/3-4` function which applies a transforming function to every
-result value before without intermediate list allocation
+There is also the `map/3-4` function which applies a transformation to every
+result value without intermediate list allocation
 
 ```erlang
 Whatevers = raw_sqlite3:map(Db, "SELECT * FROM items", fun(Elem) -> do_whatever(Elem) end)

@@ -557,7 +557,7 @@ with_trxn(Db, F) ->
                 ok = exec(Db, "COMMIT"),
                 Rv
             catch
-                Reason ->
+                _:Reason ->
                     Stacktrace = erlang:get_stacktrace(),
                     {error, #{reason => Reason, stacktrace => Stacktrace}}
             end;

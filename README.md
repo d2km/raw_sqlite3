@@ -1,29 +1,25 @@
 raw_sqlite3
 =====
 
-The library provides a NIF interface to `sqlite3`.
+`raw_sqlite3` is a thin, low-level NIF wrapper for [SQLite database](https://sqlite.org/index.html) C API.
 
-The motivation behind the library is to have a low-level wrapper which exposes
-as much as of SQLite C API as possible, excluding anything that is outdated,
-dangerous, or just makes little or no sense to use in Erlang code.
+The main motivation for the library is to have a low-level wrapper which
+exposes as much as of SQLite C API as possible, excluding anything that is
+outdated, dangerous, or just makes little or no sense for using in Erlang code.
 
-While it is believed to be safe to use (including automatic object
+One of the design goals was to have many, potentially tens of thousands DB
+connections in one Erlang node. To achieve this, the library avoids spawning
+extra OS threads by making relevant functions to run on dirty schedulers.
+
+While the library is believed to be safe to use (including automatic object
 de-allocation), it might still be possible to crash the VM because there is no
-built-in validity checks for passed parameters. So use with caution!
+built-in validation for passed parameters (e.g. nothing will prevent you from
+passing `SQLITE_OPEN_NOMUTEX` flag which will likely crash the VM).
 
-Hopefully, other libraries may utilise `raw_sqlite3` to build a safer,
-higher-level interface.
+With great power comes great responsibility. Use with caution!
 
-As opposed to [esqlite3](https://github.com/mmzeeman/esqlite) the NIF does not
-spawn any extra OS threads, since most of the NIF functions are marked as
-IO-heavy to run on dirty schedulers. While it works fine most of the time, some
-edge cases are not impossible.
-
-Interface
-----
-
-The `sqlite3_nif` module is assumed as the main entry point for the library. It provides
-wrappers for the every SQLite C API function, except:
+The `sqlite3_nif` module provides wrappers for the every SQLite C API function,
+except:
 
  * Deprecated functions;
  * Potentially dangerous, global state mutating functions, such as `sqlite3_config`;
@@ -37,19 +33,9 @@ wrappers for the every SQLite C API function, except:
  * `_vfs_*` functions;
  * ...
 
-
-Most of the exposed functions follow the C API to the letter so [the official
-documentation](https://sqlite.org/c3ref/funclist.html) should be considered as
-the primary source of information, while [the C API
-introduction](https://sqlite.org/cintro.html) should be read as a "getting
-started guide".
-
-File `include/sqlite3_nif.hrl` defines macros for C constants.
-
-The `raw_sqlite3` module contains a few convenience and utility functions to
-convert between C constants and Erlang atoms, as well as human-readable error
-messages.
-
+The `raw_sqlite3` module contains high-level wrappers for common usage
+patterns.  See [TUTORIAL](TUTORIAL.md) for some examples. EDoc-generated
+documentation available at [https://hexdocs.pm/raw_sqlite3](https://hexdocs.pm/raw_sqlite3/).
 
 Build
 -----

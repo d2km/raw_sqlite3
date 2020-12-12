@@ -67,6 +67,7 @@
 -define(SQLITE_IOERR_COMMIT_ATOMIC, (?SQLITE_IOERR bor (30 bsl 8))).
 -define(SQLITE_IOERR_ROLLBACK_ATOMIC, (?SQLITE_IOERR bor (31 bsl 8))).
 -define(SQLITE_IOERR_DATA, (?SQLITE_IOERR bor (32 bsl 8))).
+-define(SQLITE_IOERR_CORRUPTFS, (?SQLITE_IOERR bor (33 bsl 8))).
 -define(SQLITE_LOCKED_SHAREDCACHE, (?SQLITE_LOCKED bor  (1 bsl 8))).
 -define(SQLITE_LOCKED_VTAB, (?SQLITE_LOCKED bor  (2 bsl 8))).
 -define(SQLITE_BUSY_RECOVERY, (?SQLITE_BUSY   bor  (1 bsl 8))).

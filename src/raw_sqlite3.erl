@@ -533,6 +533,7 @@ do_map(Stmt, Fun, Acc) ->
                    M :: #{reason => term(), stacktrace => term()}.
 %% @doc Evaluate <code>F</code> in a transaction.
 %% The function automatically rolls back if <code>F</code> throws an error.
+-ifdef(OTP_RELEASE).
 with_trxn(Db, F) ->
     case exec(Db, "BEGIN") of
         ok ->
@@ -541,12 +542,28 @@ with_trxn(Db, F) ->
                 ok = exec(Db, "COMMIT"),
                 Rv
             catch
-                _:Reason:Stacktrace ->
+               _:Reason:Stacktrace ->
                     ok = exec(Db, "ROLLBACK"),
                     {error, #{reason => Reason, stacktrace => Stacktrace}}
             end;
         {error, _} = Err -> Err
     end.
+-else.
+with_trxn(Db, F) ->
+    case exec(Db, "BEGIN") of
+        ok ->
+            try
+                Rv = F(),
+                ok = exec(Db, "COMMIT"),
+                Rv
+            catch
+                Reason ->
+                    Stacktrace = erlang:get_stacktrace(),
+                    {error, #{reason => Reason, stacktrace => Stacktrace}}
+            end;
+        {error, _} = Err -> Err
+    end.
+-endif().
 
 %% @doc Convert a list of atoms into an integer flag.
 -spec make_flags([atom()]) -> integer().

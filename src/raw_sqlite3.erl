@@ -563,7 +563,7 @@ with_trxn(Db, F) ->
             end;
         {error, _} = Err -> Err
     end.
--endif().
+-endif.
 
 %% @doc Convert a list of atoms into an integer flag.
 -spec make_flags([atom()]) -> integer().

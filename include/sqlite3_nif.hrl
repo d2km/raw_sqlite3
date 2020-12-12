@@ -167,6 +167,11 @@
 -define(SQLITE_DBSTATUS_CACHE_USED_SHARED, 11).
 -define(SQLITE_DBSTATUS_CACHE_SPILL, 12).
 
+%% Transaction state
+-define(SQLITE_TXN_NONE, 0).
+-define(SQLITE_TXN_READ, 1).
+-define(SQLITE_TXN_WRITE, 2).
+
 %% Statement status
 -define(SQLITE_STMTSTATUS_FULLSCAN_STEP, 1).
 -define(SQLITE_STMTSTATUS_SORT, 2).

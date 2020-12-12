@@ -100,8 +100,8 @@ ok = raw_sqlite3:with_trxn(Db, fun() ->
 The low-level interface provides more precise control over what exactly is
 called and also access to less-frequently-used SQLite APIs.
 
-For instance, this is how a database can be efficiently copied into in-memory
-database
+For instance, this is how a database file can be efficiently copied into a
+freshly created in-memory database
 
 ```erlang
 %% Warning: no error handling!
@@ -113,8 +113,8 @@ init() ->
     do_backup(Backup).
 
 do_backup(Backup) ->
-    ?SQLITE_DONE = sqlite3_backup_step(Backup, -1),
-    ?SQLITE_OK = sqlite3_backup_finish(Backup).
+    ?SQLITE_DONE = sqlite3_nif:sqlite3_backup_step(Backup, -1),
+    ?SQLITE_OK = sqlite3_nif:sqlite3_backup_finish(Backup).
 ```
 
 See `test/happy_path_tests.erl` for more examples and consult [SQLite C API

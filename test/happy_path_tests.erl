@@ -21,6 +21,7 @@
                       sqlite3_db_filename/2,
                       sqlite3_db_readonly/2,
                       sqlite3_db_status/3,
+                      sqlite3_txn_state/2,
                       sqlite3_prepare_v2/2,
                       sqlite3_bind/2,
                       sqlite3_step/1,
@@ -368,6 +369,64 @@ db_status_test_() ->
            end,
     {setup, Setup, Cleanup, Inst}.
 
+txn_state_test_() ->
+    Path = "/tmp/txn_state_test",
+    Setup = fun() ->
+                    ?cmd("mkdir -p " ++ Path),
+                    {ok, Db} = sqlite3_open_v2(Path ++ "/foo", ?CRW, ""),
+                    Sql = "CREATE TABLE t(c1 TEXT); INSERT INTO t VALUES ('hello'), ('world')",
+                    ok = raw_sqlite3:exec(Db, Sql),
+                    Db
+            end,
+    Cleanup = fun(Db) ->
+                      _ = raw_sqlite3:exec(Db, "ROLLBACK"),
+                      sqlite3_close_v2(Db),
+                      ?cmd("rm -rf " ++ Path)
+              end,
+
+    T1 = fun(Db) ->
+                 Title = "sqlite3_txn_state arg error",
+                 F = fun() ->
+                             Rv = sqlite3_txn_state(Db, "nonexistent"),
+                             ?assertEqual(-1, Rv)
+                     end,
+                 {lists:flatten(Title), F}
+         end,
+    T2 = fun(Db) ->
+                 Title = "sqlite3_txn_state no txn",
+                 F = fun() ->
+                             Rv = sqlite3_txn_state(Db, "main"),
+                             ?assertEqual(?SQLITE_TXN_NONE, Rv)
+                     end,
+                 {lists:flatten(Title), F}
+         end,
+    T3 = fun(Db) ->
+                 Title = "sqlite3_txn_state read",
+                 F = fun() ->
+                             ok = raw_sqlite3:exec(Db, "BEGIN"),
+                             _ = raw_sqlite3:q(Db, "SELECT * FROM t"),
+                             Rv = sqlite3_txn_state(Db, "main"),
+                             ?assertEqual(?SQLITE_TXN_READ, Rv)
+                     end,
+                 {lists:flatten(Title), F}
+         end,
+    T4 = fun(Db) ->
+                 Title = "sqlite3_txn_state write",
+                 F = fun() ->
+                             _ = raw_sqlite3:exec(Db, "ROLLBACK"),
+                             ok = raw_sqlite3:exec(Db, "BEGIN"),
+                             ok = raw_sqlite3:exec(Db, "INSERT INTO t VALUES ('hi')"),
+                             Rv = sqlite3_txn_state(Db, "main"),
+                             ?assertEqual(?SQLITE_TXN_WRITE, Rv)
+                     end,
+                 {lists:flatten(Title), F}
+         end,
+    Inst = fun(Db) ->
+                   [T1(Db), T2(Db), T3(Db), T4(Db)]
+           end,
+    {setup, Setup, Cleanup, Inst}.
+
+
 prepare_v2_test() ->
     Leftover = " CREATE TABLE t2(c3 TEXT)",
     Sql = "CREATE TABLE t1(c1 TEXT, c2 TEXT);" ++ Leftover,
@@ -613,13 +672,13 @@ compileoption_test() ->
               end,
     [?assertEqual(1, sqlite3_compileoption_used(Opt)) || Opt <- OptList(0)].
 
--define(VSN, <<"3.33.0">>).
--define(VSN_NUM, 3033000).
+-define(VSN, <<"3.34.0">>).
+-define(VSN_NUM, 3034000).
 libversion_test() ->
     ?assertEqual(?VSN, sqlite3_libversion()),
     ?assertEqual(?VSN_NUM, sqlite3_libversion_number()).
 
--define(SOURCE_ID, <<"2020-08-14 13:23:32 fca8dc8b578f215a969cd899336378966156154710873e68b3d9ac5881b0ff3f">>).
+-define(SOURCE_ID, <<"2020-12-01 16:14:00 a26b6597e3ae272231b96f9982c3bcc17ddec2f2b6eb4df06a224b91089fed5b">>).
 sourceid_test() ->
     ?assertEqual(?SOURCE_ID, sqlite3_sourceid()).
 

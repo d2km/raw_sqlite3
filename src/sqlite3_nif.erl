@@ -34,6 +34,7 @@
          sqlite3_db_filename/2,
          sqlite3_db_readonly/2,
          sqlite3_db_status/3,
+         sqlite3_txn_state/2,
          sqlite3_prepare_v2/2,
          sqlite3_bind/2,
          sqlite3_step/1,
@@ -288,6 +289,16 @@ sqlite3_db_readonly(_Db, _DbName) ->
                    HighVal   :: integer().
 %% @doc Get database connection stats.
 sqlite3_db_status(_Db, _StatusOpt, _ResetFlag) ->
+    not_loaded(?LINE).
+
+-spec sqlite3_txn_state(sqlite3(), DbName) -> Result
+              when DbName :: sqlite3_str(),
+                   Result :: -1 |
+                             ?SQLITE_TXN_NONE |
+                             ?SQLITE_TXN_READ |
+                             ?SQLITE_TXN_WRITE.
+%% @doc Determine the transaction state of a database.
+sqlite3_txn_state(_Db, _DbName) ->
     not_loaded(?LINE).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%

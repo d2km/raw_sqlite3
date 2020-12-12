@@ -112,6 +112,7 @@
         'SQLITE_IOERR_COMMIT_ATOMIC'     |
         'SQLITE_IOERR_ROLLBACK_ATOMIC'   |
         'SQLITE_IOERR_DATA'              |
+        'SQLITE_IOERR_CORRUPTFS'         |
         'SQLITE_LOCKED_SHAREDCACHE'      |
         'SQLITE_LOCKED_VTAB'             |
         'SQLITE_BUSY_RECOVERY'           |
@@ -199,7 +200,7 @@ open(DbFile, Flags, Vfs) ->
 %% have the explicit control over a connection handle in some situations.
 close(Db) ->
     case sqlite3_nif:sqlite3_close_v2(Db) of
-        ?SQLITE_OK -> 
+        ?SQLITE_OK ->
             ok;
         Err ->
             {error, expand_error(Err)}
@@ -831,6 +832,8 @@ err_to_atom(?SQLITE_IOERR_ROLLBACK_ATOMIC) ->
     'SQLITE_IOERR_ROLLBACK_ATOMIC';
 err_to_atom(?SQLITE_IOERR_DATA) ->
     'SQLITE_IOERR_DATA';
+err_to_atom(?SQLITE_IOERR_CORRUPTFS) ->
+    'SQLITE_IOERR_CORRUPTFS';
 err_to_atom(?SQLITE_LOCKED_SHAREDCACHE) ->
     'SQLITE_LOCKED_SHAREDCACHE';
 err_to_atom(?SQLITE_LOCKED_VTAB) ->

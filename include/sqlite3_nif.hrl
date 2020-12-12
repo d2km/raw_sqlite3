@@ -67,6 +67,7 @@
 -define(SQLITE_IOERR_COMMIT_ATOMIC, (?SQLITE_IOERR bor (30 bsl 8))).
 -define(SQLITE_IOERR_ROLLBACK_ATOMIC, (?SQLITE_IOERR bor (31 bsl 8))).
 -define(SQLITE_IOERR_DATA, (?SQLITE_IOERR bor (32 bsl 8))).
+-define(SQLITE_IOERR_CORRUPTFS, (?SQLITE_IOERR bor (33 bsl 8))).
 -define(SQLITE_LOCKED_SHAREDCACHE, (?SQLITE_LOCKED bor  (1 bsl 8))).
 -define(SQLITE_LOCKED_VTAB, (?SQLITE_LOCKED bor  (2 bsl 8))).
 -define(SQLITE_BUSY_RECOVERY, (?SQLITE_BUSY   bor  (1 bsl 8))).
@@ -165,6 +166,11 @@
 -define(SQLITE_DBSTATUS_DEFERRED_FKS, 10).
 -define(SQLITE_DBSTATUS_CACHE_USED_SHARED, 11).
 -define(SQLITE_DBSTATUS_CACHE_SPILL, 12).
+
+%% Transaction state
+-define(SQLITE_TXN_NONE, 0).
+-define(SQLITE_TXN_READ, 1).
+-define(SQLITE_TXN_WRITE, 2).
 
 %% Statement status
 -define(SQLITE_STMTSTATUS_FULLSCAN_STEP, 1).

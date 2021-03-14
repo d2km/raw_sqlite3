@@ -25,6 +25,7 @@ SQLITE_CFLAGS = -DSQLITE_DOS=0 \
 		-DSQLITE_ENABLE_SNAPSHOT \
 		-DSQLITE_ENABLE_DESERIALIZE \
 		-DSQLITE_OMIT_DEPRECATED \
+		-DSQLITE_ENABLE_MATH_FUNCTIONS \
 		-I$(CURDIR)/sqlite3
 
 ERTS_INCLUDE_DIR ?= $(shell erl -noshell -s init stop -eval "io:format(\"~ts/erts-~ts/include/\", [code:root_dir(), erlang:system_info(version)]).")

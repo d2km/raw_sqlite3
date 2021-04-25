@@ -252,8 +252,8 @@ bind(Stmt, Params) ->
                    Row     :: tuple().
 %% @doc Evaluate a prepared statement and fetch one result. A statement should
 %% be run till <code>ok</code> is returned.
-%% NOTE: a fully evaluated statement is automatically reset if `sqlite3_step` is called
-%% using the statement after it returns `<code>ok</code>`.
+%% NOTE: a fully evaluated statement is automatically reset if <code>sqlite3_step</code> is called
+%% using the statement after it returns <code>ok</code>.
 step(Stmt) ->
     expand_error(sqlite3_nif:sqlite3_step(Stmt)).
 

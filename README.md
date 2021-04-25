@@ -1,7 +1,7 @@
 raw_sqlite3
 =====
 
-`raw_sqlite3` is a thin, low-level NIF wrapper for [SQLite](https://sqlite.org/index.html) C API.
+`raw_sqlite3` library is a thin, low-level NIF wrapper for [SQLite](https://sqlite.org/index.html) C API.
 
 The main motivation for the library is to have a low-level wrapper which
 exposes as much as of SQLite C API as possible, excluding anything that is
@@ -24,7 +24,7 @@ With great power comes great responsibility. Use with caution!
 Running `rebar3 compile` should just work on any modern Linux and FreeBSD system.
 
 To have a better control over the enabled SQLite features, the library includes
-the complete SQLite amalgamation.  The features are defined `c_src/Makefile`.
+the complete SQLite amalgamation.  The features are defined in `c_src/Makefile`.
 In particular, `SQLITE_CFLAGS` variable defines the available features.
 
 ## Testing

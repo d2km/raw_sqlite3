@@ -1,10 +1,5 @@
 %% @doc Convenience and utility functions for the raw_sqlite3 library.
 %%
-%% NOTE: Currently the interface of the module should NOT be considered stable
-%% since it's mostly a convenience, high-level functions. Users of the library
-%% are expected to use sqlite3_nif module directly to build their own
-%% high-level primitives since its interface is as stable as the SQLite C API
-%% and is thoroughly type-specced and covered by tests.
 -module(raw_sqlite3).
 
 -include_lib("raw_sqlite3/include/sqlite3_nif.hrl").

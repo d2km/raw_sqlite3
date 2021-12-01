@@ -17,7 +17,9 @@
                       sqlite3_get_autocommit/1,
                       sqlite3_last_insert_rowid/1,
                       sqlite3_changes/1,
+                      sqlite3_changes64/1,
                       sqlite3_total_changes/1,
+                      sqlite3_total_changes64/1,
                       sqlite3_db_filename/2,
                       sqlite3_db_readonly/2,
                       sqlite3_db_status/3,
@@ -269,10 +271,22 @@ changes_test() ->
               end,
     Sql = "CREATE TABLE t (id INTEGER PRIMARY KEY, x TEXT);"
         "INSERT INTO t(id, x) VALUES " ++
-        lists:join(", ", [ MakeVal(I) || I <- lists:seq(1, 100)]) ++ ";",
+        lists:join(", ", [ MakeVal(I) || I <- lists:seq(1, N)]) ++ ";",
     {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
     ok = raw_sqlite3:exec(Db, Sql),
     ?assertEqual(N, sqlite3_changes(Db)).
+
+changes64_test() ->
+    N = 100,
+    MakeVal = fun(I) ->
+                      lists:flatten(io_lib:format("(~B, 'hello~B')", [I, I]))
+              end,
+    Sql = "CREATE TABLE t (id INTEGER PRIMARY KEY, x TEXT);"
+        "INSERT INTO t(id, x) VALUES " ++
+        lists:join(", ", [ MakeVal(I) || I <- lists:seq(1, N)]) ++ ";",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ok = raw_sqlite3:exec(Db, Sql),
+    ?assertEqual(N, sqlite3_changes64(Db)).
 
 total_changes_test() ->
     N = 100,
@@ -281,11 +295,24 @@ total_changes_test() ->
               end,
     Sql = "CREATE TABLE t (id INTEGER PRIMARY KEY, x TEXT);"
         "INSERT INTO t(id, x) VALUES " ++
-        lists:join(", ", [ MakeVal(I) || I <- lists:seq(1, 100)]) ++ ";",
+        lists:join(", ", [ MakeVal(I) || I <- lists:seq(1, N)]) ++ ";",
     {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
     ok = raw_sqlite3:exec(Db, Sql),
     ok = raw_sqlite3:exec(Db, "UPDATE t SET x=id"),
     ?assertEqual(2*N, sqlite3_total_changes(Db)).
+
+total_changes64_test() ->
+    N = 100,
+    MakeVal = fun(I) ->
+                      lists:flatten(io_lib:format("(~B, 'hello~B')", [I, I]))
+              end,
+    Sql = "CREATE TABLE t (id INTEGER PRIMARY KEY, x TEXT);"
+        "INSERT INTO t(id, x) VALUES " ++
+        lists:join(", ", [ MakeVal(I) || I <- lists:seq(1, N)]) ++ ";",
+    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+    ok = raw_sqlite3:exec(Db, Sql),
+    ok = raw_sqlite3:exec(Db, "UPDATE t SET x=id"),
+    ?assertEqual(2*N, sqlite3_total_changes64(Db)).
 
 db_filename_test_() ->
     Path = "/tmp/db_filename_test",
@@ -672,13 +699,13 @@ compileoption_test() ->
               end,
     [?assertEqual(1, sqlite3_compileoption_used(Opt)) || Opt <- OptList(0)].
 
--define(VSN, <<"3.36.0">>).
--define(VSN_NUM, 3036000).
+-define(VSN, <<"3.37.0">>).
+-define(VSN_NUM, 3037000).
 libversion_test() ->
     ?assertEqual(?VSN, sqlite3_libversion()),
     ?assertEqual(?VSN_NUM, sqlite3_libversion_number()).
 
--define(SOURCE_ID, <<"2021-06-18 18:36:39 5c9a6c06871cb9fe42814af9c039eb6da5427a6ec28f187af7ebfb62eafa66e5">>).
+-define(SOURCE_ID, <<"2021-11-27 14:13:22 bd41822c7424d393a30e92ff6cb254d25c26769889c1499a18a0b9339f5d6c8a">>).
 sourceid_test() ->
     ?assertEqual(?SOURCE_ID, sqlite3_sourceid()).
 

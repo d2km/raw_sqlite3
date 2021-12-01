@@ -30,7 +30,9 @@
          sqlite3_get_autocommit/1,
          sqlite3_last_insert_rowid/1,
          sqlite3_changes/1,
+         sqlite3_changes64/1,
          sqlite3_total_changes/1,
+         sqlite3_total_changes64/1,
          sqlite3_db_filename/2,
          sqlite3_db_readonly/2,
          sqlite3_db_status/3,
@@ -249,9 +251,19 @@ sqlite3_last_insert_rowid(_Db) ->
 sqlite3_changes(_Db) ->
     not_loaded(?LINE).
 
+-spec sqlite3_changes64(sqlite3()) -> integer().
+%% @doc Count the number of modified rows by the last statement.
+sqlite3_changes64(_Db) ->
+    not_loaded(?LINE).
+
 -spec sqlite3_total_changes(sqlite3()) -> integer().
 %% @doc Count the total number of modified rows since the connection was opened.
 sqlite3_total_changes(_Db) ->
+    not_loaded(?LINE).
+
+-spec sqlite3_total_changes64(sqlite3()) -> integer().
+%% @doc Count the total number of modified rows since the connection was opened.
+sqlite3_total_changes64(_Db) ->
     not_loaded(?LINE).
 
 -spec sqlite3_db_filename(sqlite3(), DbName) -> DbFileName

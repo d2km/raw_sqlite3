@@ -1124,6 +1124,17 @@ impl_sqlite3_errstr(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+impl_sqlite3_error_offset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    CHECK_ARGC(argc, 1);
+
+    sqlite3_t* rdb = NULL;
+    GET_DB(env, argv[0], &rdb);
+
+    return enif_make_int(env, sqlite3_error_offset(rdb->db));
+}
+
+static ERL_NIF_TERM
 impl_sqlite3_wal_autocheckpoint(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 2);
@@ -1428,6 +1439,7 @@ static ErlNifFunc nif_funcs[] = {
     { "sqlite3_extended_errcode", 1, impl_sqlite3_extended_errcode, 0 },
     { "sqlite3_errmsg", 1, impl_sqlite3_errmsg, 0 },
     { "sqlite3_errstr", 1, impl_sqlite3_errstr, 0 },
+    { "sqlite3_error_offset", 1, impl_sqlite3_error_offset, 0 },
     { "sqlite3_wal_autocheckpoint", 2, impl_sqlite3_wal_autocheckpoint, 0 },
     { "sqlite3_wal_checkpoint_v2", 3, impl_sqlite3_wal_checkpoint_v2, DIRTY_IO },
     { "sqlite3_compileoption_get", 1, impl_sqlite3_compileoption_get, 0 },

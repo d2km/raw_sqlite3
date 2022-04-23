@@ -51,6 +51,7 @@
                       sqlite3_blob_write/3,
                       sqlite3_errcode/1,
                       sqlite3_extended_errcode/1,
+                      sqlite3_error_offset/1,
                       sqlite3_errmsg/1,
                       sqlite3_errstr/1,
                       sqlite3_wal_autocheckpoint/2,
@@ -661,6 +662,7 @@ err_test() ->
     ?assertEqual(?SQLITE_ERROR, Rv),
     ?assertEqual(?SQLITE_ERROR, sqlite3_errcode(Db)),
     ?assertEqual(?SQLITE_ERROR, sqlite3_extended_errcode(Db)),
+    ?assertEqual(0, sqlite3_error_offset(Db)),
     ?assertEqual(<<"near \"creat\": syntax error">>, sqlite3_errmsg(Db)),
     ?assertEqual(<<"SQL logic error">>, sqlite3_errstr(Rv)).
 
@@ -699,13 +701,13 @@ compileoption_test() ->
               end,
     [?assertEqual(1, sqlite3_compileoption_used(Opt)) || Opt <- OptList(0)].
 
--define(VSN, <<"3.37.0">>).
--define(VSN_NUM, 3037000).
+-define(VSN, <<"3.38.2">>).
+-define(VSN_NUM, 3038002).
 libversion_test() ->
     ?assertEqual(?VSN, sqlite3_libversion()),
     ?assertEqual(?VSN_NUM, sqlite3_libversion_number()).
 
--define(SOURCE_ID, <<"2021-11-27 14:13:22 bd41822c7424d393a30e92ff6cb254d25c26769889c1499a18a0b9339f5d6c8a">>).
+-define(SOURCE_ID, <<"2022-03-26 13:51:10 d33c709cc0af66bc5b6dc6216eba9f1f0b40960b9ae83694c986fbf4c1d6f08f">>).
 sourceid_test() ->
     ?assertEqual(?SOURCE_ID, sqlite3_sourceid()).
 

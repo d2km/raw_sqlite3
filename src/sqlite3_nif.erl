@@ -64,6 +64,7 @@
          sqlite3_blob_write/3,
          sqlite3_errcode/1,
          sqlite3_extended_errcode/1,
+         sqlite3_error_offset/1,
          sqlite3_errmsg/1,
          sqlite3_errstr/1,
          sqlite3_wal_autocheckpoint/2,
@@ -524,6 +525,11 @@ sqlite3_errcode(_Db) ->
 -spec sqlite3_extended_errcode(sqlite3()) -> sqlite3_error_code().
 %% @doc Get the latest extended error code associated with the connection.
 sqlite3_extended_errcode(_Db) ->
+    not_loaded(?LINE).
+
+-spec sqlite3_error_offset(sqlite3()) -> integer().
+%% @doc Get byte offset of the latest parse error or -1.
+sqlite3_error_offset(_Db) ->
     not_loaded(?LINE).
 
 -spec sqlite3_errmsg(sqlite3()) -> binary().

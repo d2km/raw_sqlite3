@@ -1,6 +1,6 @@
 {application, raw_sqlite3,
  [{description, "A low-level NIF interface to sqlite3"},
-  {vsn, "1.0.6"},
+  {vsn, "1.0.7"},
   {registered, []},
   {applications,
    [kernel,

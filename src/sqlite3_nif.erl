@@ -36,6 +36,7 @@
          sqlite3_db_filename/2,
          sqlite3_db_readonly/2,
          sqlite3_db_status/3,
+         sqlite3_db_name/2,
          sqlite3_txn_state/2,
          sqlite3_prepare_v2/2,
          sqlite3_bind/2,
@@ -302,6 +303,17 @@ sqlite3_db_readonly(_Db, _DbName) ->
                    HighVal   :: integer().
 %% @doc Get database connection stats.
 sqlite3_db_status(_Db, _StatusOpt, _ResetFlag) ->
+    not_loaded(?LINE).
+
+-spec sqlite3_db_name(sqlite3(), DBNum) -> Result
+              when DBNum  :: integer(),
+                   Result :: string() | nil.
+%% @doc Get database schema name
+%%  - DBNum = 0 is "main",
+%%  - DBNum = 1 is "temp",
+%%  - DBNum > 1 coresponds to ATTACH-ed databases.
+%%  Returns nil when there is no corresponding schema name.
+sqlite3_db_name(_Db, _DBNum) ->
     not_loaded(?LINE).
 
 -spec sqlite3_txn_state(sqlite3(), DbName) -> Result

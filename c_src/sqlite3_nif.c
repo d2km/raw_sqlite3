@@ -503,6 +503,24 @@ impl_sqlite3_db_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }
 
 static ERL_NIF_TERM
+impl_sqlite3_db_name(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    sqlite3_t* rdb = NULL;
+    int db_num = 0;
+
+    CHECK_ARGC(argc, 2);
+
+    GET_DB(env, argv[0], &rdb);
+    GET_INT(env, argv[1], &db_num);
+
+    const char* rv = sqlite3_db_name(rdb->db, db_num);
+    if (rv == NULL)
+        return make_atom(env, "nil");
+
+    return enif_make_string(env, rv, ERL_NIF_LATIN1);
+}
+
+static ERL_NIF_TERM
 impl_sqlite3_txn_state(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     CHECK_ARGC(argc, 2);
@@ -1409,6 +1427,7 @@ static ErlNifFunc nif_funcs[] = {
     { "sqlite3_db_filename", 2, impl_sqlite3_db_filename, 0 },
     { "sqlite3_db_readonly", 2, impl_sqlite3_db_readonly, 0 },
     { "sqlite3_db_status", 3, impl_sqlite3_db_status, 0 },
+    { "sqlite3_db_name", 2, impl_sqlite3_db_name, 0 },
     { "sqlite3_txn_state", 2, impl_sqlite3_txn_state, 0 },
     { "sqlite3_prepare_v2", 2, impl_sqlite3_prepare_v2, DIRTY_IO },
     { "sqlite3_bind", 2, impl_sqlite3_bind, 0 },

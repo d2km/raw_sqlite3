@@ -23,6 +23,7 @@
                       sqlite3_db_filename/2,
                       sqlite3_db_readonly/2,
                       sqlite3_db_status/3,
+                      sqlite3_db_name/2,
                       sqlite3_txn_state/2,
                       sqlite3_prepare_v2/2,
                       sqlite3_bind/2,
@@ -397,6 +398,28 @@ db_status_test_() ->
            end,
     {setup, Setup, Cleanup, Inst}.
 
+db_name_test() ->
+    Path = "/tmp/db_name_test",
+    Sql = "ATTACH DATABASE 'file:" ++ Path ++ "/ro?mode=ro' AS ro",
+    Tests = [{0, "main"}, {1, "temp"}, {2, "ro"}, {3, nil}],
+    Setup = fun() ->
+                    {ok, Db} = sqlite3_open_v2(":memory:", ?CRW, ""),
+                    ok = raw_sqlite3:exec(Db, Sql),
+                    Db
+            end,
+    Cleanup = fun(Db) ->
+                      sqlite3_close_v2(Db),
+                      ?cmd("rm -rf " ++ Path)
+              end,
+    T = fun(Db, N, Name) ->
+                ?assertEqual(Name, sqlite3_db_name(Db, N))
+        end,
+    Inst = fun(Db) ->
+                   [T(Db, N, Name) || {N, Name} <- Tests]
+           end,
+    {setup, Setup, Cleanup, Inst}.
+
+
 txn_state_test_() ->
     Path = "/tmp/txn_state_test",
     Setup = fun() ->
@@ -701,13 +724,13 @@ compileoption_test() ->
               end,
     [?assertEqual(1, sqlite3_compileoption_used(Opt)) || Opt <- OptList(0)].
 
--define(VSN, <<"3.38.2">>).
--define(VSN_NUM, 3038002).
+-define(VSN, <<"3.39.0">>).
+-define(VSN_NUM, 3039000).
 libversion_test() ->
     ?assertEqual(?VSN, sqlite3_libversion()),
     ?assertEqual(?VSN_NUM, sqlite3_libversion_number()).
 
--define(SOURCE_ID, <<"2022-03-26 13:51:10 d33c709cc0af66bc5b6dc6216eba9f1f0b40960b9ae83694c986fbf4c1d6f08f">>).
+-define(SOURCE_ID, <<"2022-06-25 14:57:57 14e166f40dbfa6e055543f8301525f2ca2e96a02a57269818b9e69e162e98918">>).
 sourceid_test() ->
     ?assertEqual(?SOURCE_ID, sqlite3_sourceid()).
 

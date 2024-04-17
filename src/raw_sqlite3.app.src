@@ -1,14 +1,9 @@
-{application, raw_sqlite3,
- [{description, "A low-level NIF interface to sqlite3"},
-  {vsn, "1.0.9"},
-  {registered, []},
-  {applications,
-   [kernel,
-    stdlib
-   ]},
-  {env,[]},
-  {modules, []},
-
-  {licenses, ["Apache 2.0"]},
-  {links, [{"Github", "https://github.com/d2km/raw_sqlite3"}]}
- ]}.
+{application,raw_sqlite3,
+             [{description,"A low-level NIF interface to sqlite3"},
+              {vsn,"1.0.10"},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {env,[]},
+              {modules,[]},
+              {licenses,["Apache 2.0"]},
+              {links,[{"Github","https://github.com/d2km/raw_sqlite3"}]}]}.
